@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta name="navigator-build" content="navigator-fall-2026-v25-prf-import-button-hotfix-candidate" />
+  <meta name="navigator-build" content="navigator-fall-2026-rc1" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Navigator — Ethics Beyond Boundaries</title>
@@ -1763,7 +1763,7 @@
                   <div>
                     <div class="eyebrow">Guided first session</div>
                     <div class="first-session-title">Let Navigator walk with you through the first six steps.</div>
-                    <div class="first-session-subtitle">Use this when you want one calm path instead of deciding which tool to open. The flow ends with a small personal map: today’s Pulse, one Twin signal, one insight, one Living Thread, one Field, and one Move.</div>
+                    <div class="first-session-subtitle">Use this when you want one calm path instead of deciding which tool to open. The flow ends with a small personal map: today’s Coherence Check, one Twin signal, one insight, one Living Thread, one Field, and one Move.</div>
                   </div>
                   <button class="btn small primary" type="button" onclick="openFirstSession()">Begin My First Navigator Session</button>
                 </div>
@@ -1801,7 +1801,7 @@
           <div class="card">
             <div class="card-header">
               <div class="card-title">Why this sequence?</div>
-              <div class="card-desc">Pulse gives today’s conditions. Twin gives self-understanding. Threads name what matters. Field Scans map pressure. Moves preserve agency.</div>
+              <div class="card-desc">A Coherence Check gives today’s conditions. Twin gives self-understanding. Threads name what matters. Field Scans map pressure. Moves preserve agency.</div>
             </div>
             <div class="card-body">
               <ul class="help-list">
@@ -1888,7 +1888,7 @@
                 <div class="eyebrow">A relational question to hold</div>
                 <p style="font-family:var(--serif);font-size:1.1rem;font-style:italic;margin:0 0 10px;">Is there anyone whose capacity to act from their values is being shaped — supported or limited — by your situation, decisions, or context right now?</p>
                 <p style="color:var(--muted);margin:0 0 10px;">You do not need to solve this. Just notice it.</p>
-                <textarea id="pulse-relational-note" placeholder="A few words, or nothing at all…" aria-label="Optional note about today's Pulse check-in"></textarea>
+                <textarea id="pulse-relational-note" placeholder="A few words, or nothing at all…" aria-label="Optional note about today's Coherence Check"></textarea>
               </div>
               <div class="toolbar pulse-actions">
                 <button id="pulse-save-btn" class="btn small primary" type="button" onclick="saveCoherencePulse()">Save Coherence Check</button>
@@ -2114,7 +2114,7 @@
         <div class="card co-living-card">
           <div class="card-header">
             <div class="card-title">Co-Living Signals</div>
-            <div class="card-desc">What the Twin can now attend to across time: Pulse trends, Current Move, PRF baseline, field pressures, and Beauty/Awe.</div>
+            <div class="card-desc">What the Twin can now attend to across time: Coherence Check trends, Current Move, PRF baseline, field pressures, and Beauty/Awe.</div>
           </div>
           <div class="card-body">
             <div id="co-living-signals" class="signal-list"></div>
@@ -2215,7 +2215,7 @@
         <div class="card" style="margin-top:18px;">
           <div class="card-header">
             <div class="card-title">Memory / Export</div>
-            <div class="card-desc">Global controls for the whole app: conversation, Twin Journal, Document Capsules, Field Scans, Pulse history, Move Cards, Guide Notes, PRF profile, mode, and settings.</div>
+            <div class="card-desc">Global controls for the whole app: conversation, Twin Journal, Document Capsules, Field Scans, Coherence Check history, Move Cards, Guide Notes, PRF profile, mode, and settings.</div>
             <details class="help-note"><summary>What is this?</summary><div class="help-note-body"><p>Use JSON export as the safest full backup. Use Import / Restore only when you want to replace this browser's memory. Use Merge JSON to add new records from another device, such as a phone session, without erasing this browser's existing memory.</p></div></details>
           </div>
           <div class="card-body">
@@ -2294,8 +2294,8 @@
         <div class="card" id="sync-panel" style="margin-top:18px;">
           <div class="card-header">
             <div class="card-title">Sync Between Devices</div>
-            <div class="card-desc">Move your Navigator memory between phone and laptop, or receive a Philosophical Profile from the PRF-22 app. Uses a one-time 6-character code valid for 10 minutes. Nothing is stored on the server — data is deleted the moment it is received.</div>
-            <details class="help-note"><summary>How this works</summary><div class="help-note-body"><p>When you send, your Navigator memory is compressed and held in server memory for up to 10 minutes. A 6-character code (or QR code) lets your other device retrieve it. The data is deleted immediately when received — it cannot be fetched twice. If the timer expires before you receive, nothing is retained on the server. Use this for phone ↔ laptop transfers and for importing your PRF-22 Philosophical Profile into the Navigator.</p></div></details>
+            <div class="card-desc">Move your Navigator memory between phone and laptop, or receive a Philosophical Profile from the PRF-22 app. Uses a one-time 6-character code valid for 10 minutes. The transfer service is designed to hold the encrypted transfer only during that window and delete it after receipt or expiration. Use JSON export instead when you prefer not to use server transfer.</div>
+            <details class="help-note"><summary>How this works</summary><div class="help-note-body"><p>When you send, your Navigator memory is compressed and held in server memory for up to 10 minutes. A 6-character code lets your other device retrieve it. The service is intended to delete the transfer after receipt or expiration. This client cannot independently verify server retention, so use JSON export/import when that distinction matters. Use this for phone ↔ laptop transfers and for importing your PRF-22 Philosophical Profile into the Navigator.</p></div></details>
           </div>
           <div class="card-body">
 
@@ -2307,7 +2307,7 @@
 
             <!-- ── SEND PANEL ── -->
             <div id="sync-send-panel">
-              <div class="privacy-note"><strong>What gets sent:</strong> your complete Navigator memory — the same as Export JSON. Twin conversations, Pulse history, Field Scans, Move Cards, PRF profile, Guide Notes, and Living Threads.</div>
+              <div class="privacy-note"><strong>What gets sent:</strong> your complete Navigator memory — the same as Export JSON. Twin conversations, Coherence Check history, Field Scans, Move Cards, PRF profile, Guide Notes, and Living Threads.</div>
               <div class="quick-actions" style="margin-top:12px;">
                 <button class="btn small primary" type="button" onclick="syncSend()">Generate transfer code</button>
               </div>
@@ -2318,7 +2318,7 @@
                   <div id="sync-code-text" style="font:900 2.8rem/1 var(--mono);color:var(--gold);letter-spacing:.18em;margin-bottom:12px;"></div>
                   <div id="sync-countdown" style="font:600 .82rem/1 var(--mono);color:var(--muted);margin-bottom:16px;"></div>
                   <canvas id="sync-qr-canvas" style="display:block;margin:0 auto 12px;border-radius:10px;background:#fff;padding:8px;" width="160" height="160"></canvas>
-                  <div style="font:500 .78rem/1.4 var(--mono);color:var(--dim);margin-bottom:12px;">Scan this QR code on the receiving device instead of typing the code</div>
+                  <div style="font:500 .78rem/1.4 var(--mono);color:var(--dim);margin-bottom:12px;">Enter this code on the receiving device. Remote QR generation is disabled in RC1 to avoid sharing the one-time code with a third-party QR service.</div>
                   <button class="btn small danger" type="button" onclick="syncCancel()">Cancel transfer</button>
                 </div>
               </div>
@@ -2326,7 +2326,7 @@
 
             <!-- ── RECEIVE PANEL ── -->
             <div id="sync-receive-panel" style="display:none;">
-              <div class="privacy-note"><strong>To receive a Navigator sync:</strong> enter the 6-character code shown on the sending device, or use your device camera to scan the QR code.</div>
+              <div class="privacy-note"><strong>To receive a Navigator sync:</strong> enter the 6-character code shown on the sending device.</div>
               <div style="margin-top:14px;display:grid;gap:10px;">
                 <label style="font:700 .72rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);">
                   Enter 6-character code
@@ -2354,7 +2354,7 @@
             <!-- Status message -->
             <div id="sync-status-msg" style="display:none;margin-top:12px;" class="workspace-note"></div>
 
-            <div class="privacy-note" style="margin-top:16px;"><strong>Privacy:</strong> data is held in server memory only during the transfer window and deleted immediately on receipt or after 10 minutes. It is never written to disk and cannot be accessed by anyone without the code.</div>
+            <div class="privacy-note" style="margin-top:16px;"><strong>Privacy:</strong> the transfer service is designed to hold data only during the transfer window and delete it after receipt or expiration. This app cannot independently verify server logging or retention. Use JSON export/import for a fully device-controlled transfer.</div>
           </div>
         </div>
         <!-- ── End Sync Panel ────────────────────────────────────────────── -->
@@ -2380,7 +2380,7 @@
                 <input id="maturity-snapshot-student-name" type="text" placeholder="Enter the name your instructor will recognize" oninput="saveMaturitySnapshotStudentName(this.value); generateMaturitySnapshotPreview();" />
               </label>
               <label>Optional student note, 2–3 sentences
-                <textarea id="maturity-snapshot-note" style="min-height:110px;" placeholder="Optional. Example: I used the Navigator most after class discussions. My next step is one Field Scan and one Witness Coach session." oninput="generateMaturitySnapshotPreview()"></textarea>
+                <textarea id="maturity-snapshot-note" style="min-height:110px;" placeholder="Optional. Example: I used Navigator most after class discussions. My next step is one Field Scan and one guided witness session." oninput="generateMaturitySnapshotPreview()"></textarea>
               </label>
               <div class="privacy-note"><strong>Privacy boundary:</strong> the snapshot reports engagement counts, maturity stage, and your optional note. It does not include private Navigator content unless you type it into the note yourself.</div>
               <div class="canvas-alignment-note"><strong>Canvas alignment:</strong> choose the chapter checkpoint named in Canvas. Different sections may reach chapters at different times, so use the date range your instructor assigns.</div>
@@ -2418,7 +2418,7 @@
               <div class="privacy-note"><strong>Privacy default:</strong> this output omits raw chat, full Document Capsules, raw PRF-22 JSON, and private backup data. It summarizes patterns and selected saved items only.</div>
               <div class="canvas-alignment-note"><strong>Canvas alignment:</strong> choose the export type that matches the Canvas assignment or chapter checkpoint your instructor named.</div>
               <div class="microhelp-grid">
-                <label class="microhelp-item"><input id="out-include-pulse" type="checkbox" checked onchange="generateStudentOutputPreview()" /> Include Pulse summary</label>
+                <label class="microhelp-item"><input id="out-include-pulse" type="checkbox" checked onchange="generateStudentOutputPreview()" /> Include Coherence Check summary</label>
                 <label class="microhelp-item"><input id="out-include-insight" type="checkbox" checked onchange="generateStudentOutputPreview()" /> Include selected Twin Journal insight</label>
                 <label class="microhelp-item"><input id="out-include-thread" type="checkbox" checked onchange="generateStudentOutputPreview()" /> Include Living Thread summary</label>
                 <label class="microhelp-item"><input id="out-include-field" type="checkbox" checked onchange="generateStudentOutputPreview()" /> Include Field Scan summary</label>
@@ -2910,7 +2910,7 @@
           <div class="card-header">
             <div class="card-title-row">
               <div>
-                <div class="card-title">Help / Tutorial</div>
+                <div class="card-title">Help / Tutorial</div><div class="card-desc">Release: Fall 2026 RC1. When reporting a problem, include this release name, your browser/device, and the exact error text. Do not include private reflection content unless you choose to share it.</div>
                 <div class="card-desc">A quick guide to using Navigator without needing the theory first.</div>
               </div>
               <button id="toggle-help" class="btn small ghost collapse-toggle" type="button" onclick="togglePanel('help')">Expand</button>
@@ -3071,7 +3071,7 @@ function countWords(text){
 
   const ENABLE_PWA = true;
   const DEFAULT_BACKEND = 'https://ucp-backend-4dig.onrender.com/api/claude-proxy';
-  const APP_VERSION = 'The Navigator — Ethics Beyond Boundaries / Fall 2026 v24 Import Compatibility Candidate';
+  const APP_VERSION = 'The Navigator — Ethics Beyond Boundaries / Fall 2026 RC1';
 
   const NAV_CONFIG = {
     productionMode: true,
@@ -3156,7 +3156,7 @@ function countWords(text){
     { key:'auto', label:'Auto', prompt:'choose the most fitting stance from witness, memory keeper, Pulse interpreter, move companion, Beauty/Awe inviter, gentle challenger, co-designer, or philosophy/science explorer' },
     { key:'listen', label:'Listen with me', prompt:'be a steady witness; reflect only what is needed and do not rush to advice' },
     { key:'understand', label:'Help me understand', prompt:'help clarify patterns, meanings, assumptions, and context without over-explaining' },
-    { key:'pulse', label:'Today’s Pulse', prompt:'interpret today’s Pulse and recent trends gently; connect low signals to small agency-preserving moves' },
+    { key:'pulse', label:'Today’s Coherence Check', prompt:'interpret today’s Coherence Check and recent trends gently; connect low signals to small agency-preserving moves' },
     { key:'current_move', label:'Current Move follow-up', prompt:'return to the active Current Move or plan; ask whether it is developing, blocked, complete, or ready for revision' },
     { key:'gentle_challenge', label:'Gentle challenge', prompt:'respect the user while testing blind spots, dark coherence, avoidance, or over-compliance' },
     { key:'beauty_awe', label:'Beauty/Awe', prompt:'help the user notice beauty, awe, meaning, humor, sacredness, creativity, gratitude, or future-pull' },
@@ -3619,7 +3619,7 @@ This checkpoint is a student-generated engagement snapshot. It is not an automat
   }
 
   function updatePanelSummaries(){
-    const journal = getJournal();
+    const journal = getJournal().slice(-12);
     const capsules = getCapsules();
     const scans = getFieldScans();
     const pending = getPendingCapsule();
@@ -5019,7 +5019,7 @@ function importStandaloneDailyPulseJSON(pulse){
     const chips = defs.map((s,i) => '<button class="first-session-chip ' + (s.done ? 'done ' : '') + (i === step ? 'current' : '') + '" type="button" onclick="setFirstSessionStep(' + i + ')">' + (i+1) + '. ' + escapeHtml(s.label) + '</button>').join('');
     let body = '';
     if(step === 0){
-      body = '<div class="first-session-step-card"><div class="first-session-step-title">Step 1: Check In</div><div class="first-session-step-text">Begin with today’s Pulse. This is not a grade or diagnosis. It is a one-minute weather report for the conditions supporting your agency.</div><div class="quick-actions"><button class="btn small primary" type="button" onclick="showWorkspace(\'pulse\')">Open Coherence Check</button><button class="btn small ghost" type="button" onclick="setFirstSessionStep(1)">Continue</button></div></div>';
+      body = '<div class="first-session-step-card"><div class="first-session-step-title">Step 1: Check In</div><div class="first-session-step-text">Begin with today’s Coherence Check. This is not a grade or diagnosis. It is a one-minute weather report for the conditions supporting your agency.</div><div class="quick-actions"><button class="btn small primary" type="button" onclick="showWorkspace(\'pulse\')">Open Coherence Check</button><button class="btn small ghost" type="button" onclick="setFirstSessionStep(1)">Continue</button></div></div>';
     } else if(step === 1){
       body = '<div class="first-session-step-card"><div class="first-session-step-title">Step 2: Meet Your Twin</div><div class="first-session-step-text">Tell your Twin one thing that matters right now. A few honest words are enough. The goal is relationship, not performance.</div><div class="first-session-form"><label>What matters to you right now?<textarea id="fs-twin-text" placeholder="Example: I want to get through this semester without losing the part of me that cares about meaningful work.">' + escapeHtml(st.notes.firstMatter || '') + '</textarea></label></div><div class="quick-actions"><button class="btn small primary" type="button" onclick="firstSessionOpenTwinWithSignal()">Open Twin with this signal</button><button class="btn small ghost" type="button" onclick="setFirstSessionStep(2)">Continue</button></div></div>';
     } else if(step === 2){
@@ -5032,7 +5032,7 @@ function importStandaloneDailyPulseJSON(pulse){
       body = '<div class="first-session-step-card"><div class="first-session-step-title">Step 6: Choose One Small Move</div><div class="first-session-step-text">A move is not your whole life plan. It is the next concrete step small enough to begin and honest enough to matter.</div><div class="first-session-form"><label>Move title<input id="fs-move-title" placeholder="Example: Protect one hour for meaningful work" /></label><label>First action<textarea id="fs-move-action" placeholder="What exactly could you do first?"></textarea></label><label>Why does this preserve agency?<textarea id="fs-move-why"></textarea></label><label>What support would help?<textarea id="fs-move-support"></textarea></label></div><div class="quick-actions"><button class="btn small primary" type="button" onclick="firstSessionSaveMove()">Save Small Move</button><button class="btn small ghost" type="button" onclick="setFirstSessionStep(6)">See My First Map</button></div></div>';
     } else {
       const s = firstSessionLatestSummary();
-      body = '<div class="first-session-step-card"><div class="first-session-step-title">Chapter 1–2: My First Navigator Map</div><div class="first-session-step-text">This is not a final identity. It is a first map that your Twin can return to with you.</div><div class="first-session-summary"><div class="first-session-summary-item"><strong>Today’s Pulse</strong>' + escapeHtml(s.pulse) + '</div><div class="first-session-summary-item"><strong>One Twin signal</strong>' + escapeHtml(truncateText(s.twin, 180)) + '</div><div class="first-session-summary-item"><strong>One insight</strong>' + escapeHtml(s.insight) + '</div><div class="first-session-summary-item"><strong>Living Thread</strong>' + escapeHtml(s.thread) + '</div><div class="first-session-summary-item"><strong>Field</strong>' + escapeHtml(s.field) + '</div><div class="first-session-summary-item"><strong>Small Move</strong>' + escapeHtml(s.move) + '</div></div><div class="quick-actions" style="margin-top:14px;"><button class="btn small primary" type="button" onclick="askTwinAboutFirstSessionMap()">Ask Twin About This Map</button><button class="btn small ghost" type="button" onclick="exportTwinJournal(\'json\')">Export JSON Backup</button><button class="btn small primary" type="button" onclick="showStudentOutputPanel()">Create Student Reflection Output</button><button class="btn small ghost" type="button" onclick="showWorkspace(\'home\')">Return Home</button></div></div>';
+      body = '<div class="first-session-step-card"><div class="first-session-step-title">Chapter 1–2: My First Navigator Map</div><div class="first-session-step-text">This is not a final identity. It is a first map that your Twin can return to with you.</div><div class="first-session-summary"><div class="first-session-summary-item"><strong>Today’s Coherence Check</strong>' + escapeHtml(s.pulse) + '</div><div class="first-session-summary-item"><strong>One Twin signal</strong>' + escapeHtml(truncateText(s.twin, 180)) + '</div><div class="first-session-summary-item"><strong>One insight</strong>' + escapeHtml(s.insight) + '</div><div class="first-session-summary-item"><strong>Living Thread</strong>' + escapeHtml(s.thread) + '</div><div class="first-session-summary-item"><strong>Field</strong>' + escapeHtml(s.field) + '</div><div class="first-session-summary-item"><strong>Small Move</strong>' + escapeHtml(s.move) + '</div></div><div class="quick-actions" style="margin-top:14px;"><button class="btn small primary" type="button" onclick="askTwinAboutFirstSessionMap()">Ask Twin About This Map</button><button class="btn small ghost" type="button" onclick="exportTwinJournal(\'json\')">Export JSON Backup</button><button class="btn small primary" type="button" onclick="showStudentOutputPanel()">Create Student Reflection Output</button><button class="btn small ghost" type="button" onclick="showWorkspace(\'home\')">Return Home</button></div></div>';
     }
     box.innerHTML = '<div class="first-session-header"><div><div class="eyebrow">First-session flow</div><div class="first-session-title">Step ' + (step === 6 ? 'summary' : (step + 1) + ' of 6') + '</div><div class="first-session-subtitle">Complete what is useful today. You can leave and return at any time.</div></div><div class="pill"><span class="dot ok"></span>' + done + ' / 6 complete</div></div><div class="first-session-progress"><div class="bar"><div class="bar-fill" style="width:' + pct + '%"></div></div><div class="first-session-steps">' + chips + '</div></div>' + body;
   }
@@ -6907,7 +6907,7 @@ Essential design principle: The Twin is the coherence core. Guide modules, Pulse
     if(stance === 'pulse' && pulse){
       const low = getLowestPulseDomain(pulse.scores || {});
       question = 'What is one small thing today that could protect ' + low.label + ' without demanding too much from you?';
-      reply = 'I want to stay close to today rather than turn this into another abstract reflection. Your latest Pulse gives me a continuity signal: ' + low.label + ' may need attention. I am not treating that as a diagnosis; I am treating it as a place where your agency may need gentleness and protection. ' + question;
+      reply = 'I want to stay close to today rather than turn this into another abstract reflection. Your latest Coherence Check gives me a continuity signal: ' + low.label + ' may need attention. I am not treating that as a diagnosis; I am treating it as a place where your agency may need gentleness and protection. ' + question;
     } else if(stance === 'current_move' && (current || plan)){
       const title = current ? current.title : (plan.moveTitle || 'your current move');
       question = 'Is this move still alive, blocked, completed, or asking to be revised?';
@@ -9124,7 +9124,7 @@ Return only valid JSON with this shape:
       + 'Raw capacity: ' + scan.rawCapacity + '\n'
       + 'Perceived capacity: ' + scan.perceivedCapacity + '\n'
       + 'Suppression gap: ' + scan.suppressionGap + '\n'
-      + 'Stress/survival pressure: ' + scan.stressLoad + '\n'
+      + 'Pressure / urgency: ' + scan.stressLoad + '\n'
       + 'BioBond/support: ' + scan.bioBond + '\n'
       + 'Next agency-preserving move: ' + scan.nextMove;
   }
@@ -11171,29 +11171,15 @@ console.info('Navigator build loaded:', window.NAV_FALL_2026_BUILD);
   function syncDrawQR(code) {
     var canvas = document.getElementById('sync-qr-canvas');
     if (!canvas) return;
-    var url = SYNC_BACKEND.replace('https://','') + '/api/sync/fetch?code=' + code;
-    // Use Google Charts QR API as a reliable fallback rendered as an image
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function() {
-      var ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 160, 160);
-      ctx.drawImage(img, 0, 0, 160, 160);
-    };
-    img.onerror = function() {
-      // If image fails, show text fallback
-      var ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 160, 160);
-      ctx.fillStyle = '#000000';
-      ctx.font = '11px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('Code: ' + code, 80, 80);
-      ctx.fillText('(scan unavailable)', 80, 96);
-    };
-    // Use QR server API — free, no key required, no data retained
-    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent('https://rmertzman-tech.github.io/SPC-Navigator/#sync=' + code);
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 160, 160);
+    ctx.fillStyle = '#0b1220';
+    ctx.textAlign = 'center';
+    ctx.font = '700 20px monospace';
+    ctx.fillText(String(code || '').slice(0,6), 80, 76);
+    ctx.font = '11px monospace';
+    ctx.fillText('enter on other device', 80, 100);
   }
 
   // ── Handle incoming QR scan via URL hash ──────────────────────────────────
@@ -11780,7 +11766,8 @@ console.info('Navigator build loaded:', window.NAV_FALL_2026_BUILD);
       const res = await fetch(EBB_BACKEND, {
         method:'POST', signal:AbortSignal.timeout(40000),
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:650, mode:'coach', system:systemPrompt, messages:[{role:'user',content:userMsg}] })
+        body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:650, mode:'coach', system:systemPrompt, messages:[{role:'user',content:userMsg}] }),
+        credentials:'omit', cache:'no-store', referrerPolicy:'no-referrer', signal:AbortSignal.timeout(30000)
       });
       const data = await res.json();
       const note = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('') || data.response || '';
