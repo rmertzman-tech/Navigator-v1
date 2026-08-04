@@ -1,7 +1,7 @@
 {
   "name": "The Navigator — Ethics Beyond Boundaries",
   "short_name": "Navigator",
-  "description": "A local-first Ethics Beyond Boundaries reflection tool with student-controlled Canvas exports, explicit support resources, and governed AI-assisted features.",
+  "description": "A local-first Ethics Beyond Boundaries reflection tool with student-controlled Canvas exports, explicit support resources, and governed AI-assisted features. Fall 2026 v24 import compatibility candidate.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

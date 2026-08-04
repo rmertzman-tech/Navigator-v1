@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta name="navigator-build" content="navigator-fall-2026-v23-safety-candidate" />
+  <meta name="navigator-build" content="navigator-fall-2026-v24-import-compatibility-candidate" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Navigator — Ethics Beyond Boundaries</title>
@@ -2274,15 +2274,16 @@
               <button class="btn small ghost" type="button" onclick="exportTwinJournal('txt')">Export TXT</button>
               <button class="btn small ghost" type="button" onclick="exportTwinJournal('json')">Export JSON</button>
               <button class="btn small primary" type="button" onclick="triggerImportTwinMemory()">Import / Restore JSON</button>
-              <input id="import-json-file" type="file" accept="application/json,.json" style="display:none" onchange="handleImportTwinMemoryFile(event)" aria-label="Import Navigator JSON backup file">
+              <input id="import-json-file" type="file" accept="application/json,.json" style="display:none" onchange="handleImportTwinMemoryFile(event)" aria-label="Import Navigator, Examined, Gateway PRF-22, or Daily Practice JSON file">
               <button class="btn small purple" type="button" onclick="triggerChapterWorkbookImport()">Import Chapter Workbook File</button>
               <input id="chapter-workbook-import-file" type="file" accept="application/json,.json" style="display:none" onchange="handleChapterWorkbookImportFile(event)" aria-label="Import EBB chapter workbook JSON file">
               <button class="btn small purple" type="button" onclick="triggerMergeTwinMemory()">Merge JSON from Device</button>
-              <input id="merge-json-file" type="file" accept="application/json,.json" style="display:none" onchange="handleMergeTwinMemoryFile(event)" aria-label="Merge Navigator JSON file from another device">
+              <input id="merge-json-file" type="file" accept="application/json,.json" style="display:none" onchange="handleMergeTwinMemoryFile(event)" aria-label="Merge Navigator, Examined, or Gateway JSON file from another device">
               <button class="btn small ghost" type="button" onclick="exportLastPreMergeBackup()">Download Pre-Merge Backup</button>
               <button class="btn small danger" type="button" onclick="clearTwinMemory()">Clear Twin Memory</button>
             </div>
             <div class="privacy-note"><strong>Restore</strong> replaces this browser's memory. <strong>Merge</strong> adds new items from another device while preserving this browser's current PRF profile, settings, Current Move, and Context Assembly unless those are empty. Merge is not cloud sync; it is a local-first bridge for phone-to-laptop continuity.</div>
+            <div class="privacy-note" style="border-left-color: rgba(167,139,250,.65);"><strong>Supported JSON formats:</strong> Navigator full backup, Examined full twin, PRF-22 Gateway profile, standalone Daily Practice / Coherence Check, and standalone Phenomenology First. A profile-only file is added without erasing conversations. Examined six-signal readings keep their six observed values; Navigator marks Beauty / Awe / Meaning as a neutral compatibility placeholder rather than pretending it was measured.</div>
             <div class="privacy-note" style="border-left-color: rgba(96,163,111,.65);"><strong>Chapter Workbook Import</strong> brings in a private file created by an EBB chapter app, such as Chapter 2 Moral Lens Lab. You preview it first, choose what to import, and decide whether to add, merge, replace the chapter record, or cancel. Nothing is uploaded automatically.</div>
             <div id="chapter-import-status" class="privacy-note" style="display:none; border-left-color: rgba(96,163,111,.65);"></div>
             <div id="development-arc-panel" class="privacy-note" style="border-left-color: rgba(201,168,76,.55);"></div>
@@ -2460,12 +2461,12 @@
         <div class="card" style="margin-top:18px;">
           <div class="card-header">
             <div class="card-title">Import Your Philosophical Profile (PRF-22)</div>
-            <div class="card-desc">Use this after completing the Orientation profile. Importing your profile helps the Navigator connect your reflections with your starting moral lens. The profile is treated as a hypothesis, not a verdict.</div>
+            <div class="card-desc">Use this after completing the Orientation profile. Importing your Gateway or compatible Examined profile helps the Navigator connect your reflections with your starting moral lens. The profile is treated as a hypothesis, not a verdict.</div>
             <details class="help-note"><summary>What is this?</summary><div class="help-note-body"><p>The PRF-22 profile can seed the Twin with a starting map of moral foundations, reasoning style, ATCF/coherence indicators, trust orientation, and growth questions. Navigator stores it locally and sends only a brief summary to the backend when you allow it to be included in Twin context.</p></div></details>
           </div>
           <div class="card-body">
             <div class="toolbar">
-              <button class="btn small primary" type="button" onclick="triggerImportPrf22Profile()">Import PRF-22 JSON</button>
+              <button class="btn small primary" type="button" onclick="triggerImportPrf22Profile()">Import PRF-22 / Gateway JSON</button>
               <input id="import-prf22-file" type="file" accept="application/json,.json" style="display:none" onchange="handleImportPrf22File(event)" aria-label="Import PRF-22 profile JSON file">
               <button class="btn small ghost" type="button" onclick="createPrfJournalSeed()">Create Journal Seed</button>
               <button class="btn small ghost" type="button" onclick="createPrfCapsule()">Create PRF Capsule</button>
@@ -3070,7 +3071,7 @@ function countWords(text){
 
   const ENABLE_PWA = true;
   const DEFAULT_BACKEND = 'https://ucp-backend-4dig.onrender.com/api/claude-proxy';
-  const APP_VERSION = 'The Navigator — Ethics Beyond Boundaries / Fall 2026 v23 Safety Candidate';
+  const APP_VERSION = 'The Navigator — Ethics Beyond Boundaries / Fall 2026 v24 Import Compatibility Candidate';
 
   const NAV_CONFIG = {
     productionMode: true,
@@ -4016,20 +4017,7 @@ async function handleImportPrf22File(event){
       return;
     }
 
-    const profile = normalizeImportedPrf22Profile(data, { fileName:file.name });
-    if(!profile) throw new Error('This JSON could not be read as a PRF-22 / E-Twin profile.');
-
-    const ranked = profile.foundationsRanked || [];
-    const preview = ranked.length
-      ? ranked.slice(0,3).map(x => x.label + ' ' + x.value).join(', ')
-      : 'limited recognized PRF fields';
-
-    if(!confirm('Import this PRF-22 profile into local Navigator memory? Preview: ' + preview + '.')) return;
-
-    setPrf22Profile(profile);
-    renderAll();
-
-    alert('PRF-22 profile imported. It is stored locally. The Twin will receive only a short summary, not the raw JSON, while Twin Context is on.');
+    importPrf22ProfileData(data, file.name);
   } catch(e) {
     alert('Could not import PRF-22 profile: ' + e.message);
     showDebug('PRF-22 IMPORT ERROR: ' + (e && e.stack ? e.stack : e.message));
@@ -7850,7 +7838,7 @@ Return only valid JSON with this exact shape:
     const id = String(entry.id || entry.entryId || uid('phenom'));
     const createdAt = entry.createdAt || entry.date || new Date().toISOString();
     const phen = entry.phenomenology || entry;
-    const responses = phen.responses || entry.responses || {};
+    const responses = phen.responses || entry.responses || phen || {};
     const coherence = entry.coherenceTranslation || entry.coherence || {};
     const scores = coherence.scores && typeof coherence.scores === 'object' ? coherence.scores : (entry.scores && typeof entry.scores === 'object' ? entry.scores : null);
     const cleanScores = {};
@@ -7881,6 +7869,243 @@ Return only valid JSON with this exact shape:
       source: entry.source || 'navigator_import',
       importedAt: entry.importedAt || new Date().toISOString()
     };
+  }
+
+
+  // ── NAV-FALL-2026-24: JSON import compatibility and provenance adapters ──
+  function isPhenomenologicalPulseJSON(data){
+    if(!data || typeof data !== 'object' || Array.isArray(data)) return false;
+    if(Array.isArray(data.phenomenologyPulse) || data.type === 'daily_pulse' || data.subtype === 'phenomenology_first_abcd') return false;
+    const phen = data.phenomenology && typeof data.phenomenology === 'object' ? data.phenomenology : null;
+    const responses = (phen && phen.responses) || data.responses || phen || {};
+    const tags = Array.isArray(data.tags) ? data.tags.map(t => String(t).toLowerCase()) : [];
+    const hasPhenomenologyText = !!(
+      responses.attend || responses.Attend || responses.agency || responses.A || responses.beauty || responses.beautyAwe || responses.B || responses.context || responses.C || responses.dynamic || responses.D
+    );
+    return !!(
+      data.type === 'phenomenological_pulse' ||
+      data.subtype === 'phenomenology_first_with_coherence_translation' ||
+      (hasPhenomenologyText && (
+        data.coherenceTranslation || data.linkedCoherencePulseId || data.source === 'phenomenology_first' ||
+        tags.includes('phenomenology_first') || tags.includes('phenomenological_pulse')
+      ))
+    );
+  }
+
+  function compatibilityStableHash(value){
+    const text = String(value == null ? '' : value);
+    let hash = 2166136261;
+    for(let i=0;i<text.length;i++){
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36);
+  }
+
+  function isPrf22ProfileJSON(data){
+    if(!data || typeof data !== 'object' || Array.isArray(data)) return false;
+    return !!(
+      (data.source === 'PRF-22' && data.profileType === 'E-Twin Profile') ||
+      String(data.version || '').toLowerCase().includes('prf22') ||
+      (data.foundations && (data.foundationsRanked || data.prfScoresRaw || data.growthTarget || data.questionsForTwin))
+    );
+  }
+
+  function isExaminedTwinJSON(data){
+    if(!data || typeof data !== 'object' || Array.isArray(data)) return false;
+    if(data.appVersion || Array.isArray(data.chat) || Array.isArray(data.journal) || Array.isArray(data.coherencePulse)) return false;
+    const structuralMatch = Array.isArray(data.chatHistory) || Array.isArray(data.coherenceHistory) || Array.isArray(data.archive) || Array.isArray(data.recoveryHistory);
+    const profileMatch = !!(data.prfScores && typeof data.prfScores === 'object' && (data.profile != null || data.asmAnswers || data.assembly));
+    return structuralMatch || profileMatch;
+  }
+
+  function normalizeExaminedPrfScore(value){
+    const n = Number(value);
+    if(!Number.isFinite(n)) return null;
+    if(n >= 0 && n <= 12) return Math.round((n / 12) * 100);
+    return normalizePrfScore(n);
+  }
+
+  function examinedProfileToPrf22(data, fileName){
+    if(!data || typeof data !== 'object') return null;
+    const raw = data.prfScores && typeof data.prfScores === 'object' ? data.prfScores : {};
+    const foundations = {
+      care: normalizeExaminedPrfScore(raw.care),
+      fairness: normalizeExaminedPrfScore(raw.fairness != null ? raw.fairness : raw.fair),
+      loyalty: normalizeExaminedPrfScore(raw.loyalty != null ? raw.loyalty : raw.loyal),
+      authority: normalizeExaminedPrfScore(raw.authority != null ? raw.authority : raw.auth),
+      purity: normalizeExaminedPrfScore(raw.purity != null ? raw.purity : raw.sanctity)
+    };
+    const hasScores = Object.keys(foundations).some(k => foundations[k] !== null);
+    const philosophicalProfile = typeof data.profile === 'string' ? data.profile.trim() : '';
+    const assemblyHistory = data.assembly && typeof data.assembly === 'object' ? data.assembly : (data.asmAnswers && typeof data.asmAnswers === 'object' ? data.asmAnswers : {});
+    if(!hasScores && !philosophicalProfile && !Object.keys(assemblyHistory).length) return null;
+    const profile = {
+      id:'examined_prf_' + compatibilityStableHash([fileName || '', philosophicalProfile.slice(0,800), JSON.stringify(raw)].join('|')),
+      source:'PRF-22',
+      profileType:'E-Twin Profile',
+      importedAt:new Date().toISOString(),
+      fileName:fileName || 'Examined twin JSON',
+      version:'examined-compat-v1',
+      includeInTwin:true,
+      foundations,
+      foundationsRanked:rankPrfFoundations(foundations),
+      reasoningStyle:{ styleLabel:'Imported from Examined; no additional reasoning-style score inferred.' },
+      atcf:{}, trust:{}, orientation:{},
+      growthTarget:'',
+      questionsForTwin:[],
+      summary:'',
+      philosophicalProfile:philosophicalProfile.slice(0, 30000),
+      assemblyHistory:assemblyHistory,
+      prfScoresRaw:raw,
+      compatibilityNote:'Examined PRF scores at or below 12 were converted proportionally to a 0–100 display scale. Raw source values are retained; this is a compatibility translation, not a new assessment.',
+      raw:compactPrfRaw({ prfScores:raw, profile:philosophicalProfile, assemblyHistory:assemblyHistory })
+    };
+    const rankedText = profile.foundationsRanked.slice(0,3).map(x => x.label + ' (' + x.value + ')').join(', ');
+    profile.summary = ('Imported from Examined. Recognized moral-foundation pattern: ' + (rankedText || 'no scored foundation detected') + '. ' + (philosophicalProfile ? philosophicalProfile : 'No philosophical-profile prose was present.')).slice(0,1600);
+    profile.questionsForTwin = buildPrfQuestions(profile);
+    return profile;
+  }
+
+  function examinedTimestamp(value){
+    if(!value) return new Date().toISOString();
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  }
+
+  function convertExaminedTwinToNavigatorPayload(data, fileName){
+    const chat = (Array.isArray(data.chatHistory) ? data.chatHistory : []).map((m, index) => ({
+      id: m && m.id ? String(m.id) : 'examined_turn_' + compatibilityStableHash([index, m && m.role, m && m.content, m && (m.timestamp || m.date)].join('|')),
+      role: m && ['user','assistant','system'].includes(m.role) ? m.role : 'system',
+      content: String((m && (m.content || m.text)) || '').slice(0,12000),
+      timestamp: examinedTimestamp(m && (m.timestamp || m.date || m.createdAt))
+    })).filter(m => m.content.trim());
+
+    const journal = [];
+    (Array.isArray(data.archive) ? data.archive : []).forEach((entry, index) => {
+      const body = String((entry && (entry.text || entry.exchange || entry.noteText || entry.content)) || '').trim();
+      if(!body) return;
+      const mode = String((entry && entry.mode) || 'reflection').trim();
+      const timestamp = examinedTimestamp(entry && (entry.date || entry.timestamp || entry.createdAt));
+      journal.push({
+        id: entry && entry.id ? String(entry.id) : 'examined_archive_' + compatibilityStableHash([index, timestamp, mode, body].join('|')),
+        text: ('Imported from Examined archive [' + mode + ']\n\n' + body).slice(0,12000),
+        category: mode === 'recover' ? 'agency' : 'meaning',
+        confidence:.65,
+        sourceTurnIds:[],
+        timestamp
+      });
+    });
+
+    const coherencePulse = (Array.isArray(data.coherenceHistory) ? data.coherenceHistory : []).map((entry, index) => {
+      const sourceScores = entry && entry.scores;
+      const values = [];
+      if(Array.isArray(sourceScores)){
+        for(let i=0;i<6;i++) values.push(sourceScores[i]);
+      } else if(sourceScores && typeof sourceScores === 'object'){
+        const keys = ['physicalEnergy','temporalHorizon','relationalCoherence','structuralClarity','identityIntegrity','recoveryAccess'];
+        keys.forEach(k => values.push(sourceScores[k]));
+      }
+      const scores = {};
+      for(let i=0;i<6;i++) scores[COHERENCE_PULSE_DOMAINS[i].key] = Math.max(0, Math.min(5, Number(values[i] == null ? 3 : values[i])));
+      scores.beautyAweMeaning = 3;
+      const timestamp = examinedTimestamp(entry && (entry.createdAt || entry.timestamp || entry.date));
+      const compatibilityNote = 'Imported from Examined. Beauty / Awe / Meaning was not part of the six-signal source record; Navigator uses neutral 3 as a compatibility placeholder, not an observed score.';
+      const sourceNote = String((entry && (entry.note || entry.relationalNote || entry.abcThought)) || '').trim();
+      return {
+        id: entry && entry.id ? String(entry.id) : 'examined_pulse_' + compatibilityStableHash([index, timestamp, JSON.stringify(values), sourceNote].join('|')),
+        createdAt:timestamp,
+        dateLabel:String((entry && entry.dateLabel) || (entry && entry.date) || new Date(timestamp).toLocaleDateString([], {month:'short',day:'numeric'})).slice(0,40),
+        scores,
+        avg:averagePulseScores(scores),
+        lowestKey:getLowestPulseDomain(scores).key,
+        note:(sourceNote ? sourceNote + '\n\n' : '') + compatibilityNote,
+        relationalNote:String((entry && entry.relationalNote) || '').slice(0,1500),
+        abcThought:String((entry && entry.abcThought) || '').slice(0,1000),
+        source:'examined-compat-v1'
+      };
+    });
+
+    const prf22Profile = examinedProfileToPrf22(data, fileName);
+    return {
+      appVersion:'Examined compatibility import',
+      exportedAt:new Date().toISOString(),
+      chat,
+      journal,
+      coherencePulse,
+      prf22Profile,
+      mode:data.currentMode === 'human_starts' ? 'human_starts' : 'twin_asks',
+      compatibilityImport:{
+        sourceFormat:'Examined full twin',
+        adapterVersion:'examined-compat-v1',
+        fileName:fileName || '',
+        notes:[
+          'Examined chatHistory mapped to Navigator conversation turns.',
+          'Examined archive mapped to clearly labeled Navigator Journal entries.',
+          'Examined six-signal coherence mapped to the first six Navigator signals; Beauty / Awe / Meaning set to neutral 3 as a non-observed compatibility placeholder.',
+          'PRF raw scores and source profile prose preserved where present.'
+        ]
+      }
+    };
+  }
+
+  function adaptSupportedJSONForNavigator(data, fileName){
+    if(isExaminedTwinJSON(data)) return convertExaminedTwinToNavigatorPayload(data, fileName);
+    if(isPrf22ProfileJSON(data)){
+      return {
+        appVersion:'PRF-22 compatibility import',
+        prf22Profile:data,
+        compatibilityImport:{ sourceFormat:'PRF-22 / Gateway profile', adapterVersion:'prf22-direct-v1', fileName:fileName || '', notes:['Profile-only import; existing Navigator memories remain separate during merge.'] }
+      };
+    }
+    return data;
+  }
+
+  function importPrf22ProfileData(data, fileName){
+    const sourceData = isExaminedTwinJSON(data) ? examinedProfileToPrf22(data, fileName) : normalizeImportedPrf22Profile(data, { fileName:fileName || '' });
+    const profile = sourceData;
+    if(!profile) throw new Error('This JSON does not contain a recognizable PRF-22 / E-Twin profile.');
+    const ranked = profile.foundationsRanked || [];
+    const preview = ranked.length ? ranked.slice(0,3).map(x => x.label + ' ' + x.value).join(', ') : 'profile prose or limited recognized PRF fields';
+    if(!confirm('Import this PRF-22 profile into local Navigator memory? Preview: ' + preview + '. Existing conversations and reflections will remain.')) return false;
+    setPrf22Profile(profile);
+    renderAll();
+    alert('PRF-22 profile imported. It is stored locally. Existing Navigator memories were not replaced. The Twin receives only a short summary while Twin Context is on.');
+    return true;
+  }
+
+  function importPhenomenologicalPulseFile(data){
+    const entry = normalizeImportedPhenomenologyPulse(data);
+    if(!entry) throw new Error('This file could not be read as a Phenomenology First entry.');
+    const history = getPhenomenologyPulseHistory();
+    const fingerprint = compatibilityStableHash([entry.createdAt, entry.phenomenology.attend, entry.phenomenology.agency, entry.phenomenology.beauty, entry.phenomenology.context, entry.phenomenology.dynamic].join('|'));
+    const duplicate = history.some(existing => existing && (String(existing.id) === String(entry.id) || compatibilityStableHash([existing.createdAt, existing.phenomenology && existing.phenomenology.attend, existing.phenomenology && existing.phenomenology.agency, existing.phenomenology && existing.phenomenology.beauty, existing.phenomenology && existing.phenomenology.context, existing.phenomenology && existing.phenomenology.dynamic].join('|')) === fingerprint));
+    if(duplicate){
+      alert('This Phenomenology First entry is already in Navigator memory. No duplicate was added.');
+      return null;
+    }
+    const scores = entry.coherenceTranslation && entry.coherenceTranslation.scores;
+    if(scores){
+      const pulse = normalizeImportedCoherencePulse({
+        id:entry.linkedCoherencePulseId || 'pulse_from_' + entry.id,
+        createdAt:entry.createdAt,
+        dateLabel:entry.dateLabel,
+        scores:scores,
+        note:'Linked import from Phenomenology First. ' + String(entry.coherenceTranslation.studentNote || ''),
+        abcThought:'Phenomenology First translation; source entry ' + entry.id
+      });
+      entry.linkedCoherencePulseId = pulse.id;
+      const pulseHistory = getCoherencePulseHistory();
+      if(!pulseHistory.some(p => p && String(p.id) === String(pulse.id))){
+        pulseHistory.push(pulse);
+        setCoherencePulseHistory(pulseHistory);
+      }
+    }
+    history.push(entry);
+    setPhenomenologyPulseHistory(history);
+    renderAll();
+    alert('Phenomenology First entry imported. Any declared coherence translation was linked without replacing existing memory.');
+    return entry;
   }
 
   function validateImportPayload(data){
@@ -7920,9 +8145,10 @@ Return only valid JSON with this exact shape:
     const capabilityLessons = normalizeCapabilityLessonProgress(data.capabilityLessons || data.capabilityEngineLessons || null);
     const firstSession = normalizeFirstSessionState(data.firstSession || null);
     const maturitySnapshotBaseline = data.maturitySnapshotBaseline && typeof data.maturitySnapshotBaseline === 'object' ? data.maturitySnapshotBaseline : null;
+    const compatibilityImport = data.compatibilityImport && typeof data.compatibilityImport === 'object' ? data.compatibilityImport : null;
     const hasUsable = chat.length || journal.length || documentCapsules.length || fieldScans.length || moveCards.length || pendingMoveCards.length || coachNotes.length || coherencePulse.length || phenomenologyPulse.length || livingThreads.length || Object.keys(capabilityLessons.completed || {}).length || Object.keys(capabilityLessons.reflections || {}).length || prf22Profile || maturitySnapshotBaseline || (contextAssembly && contextAssembly.text && contextAssembly.text.trim());
     if(!hasUsable) throw new Error('The selected JSON does not contain usable Navigator memory records.');
-    return { chat, journal, coverage, questions, mode, twinStance, documentCapsules, fieldScans, contextAssembly, moveCards, pendingMoveCards, currentMoveId, moveCompareSelection, moveComparisonLens, currentMovePlan, prf22Profile, coachNotes, livingThreads, capabilityLessons, coherencePulse, phenomenologyPulse, firstSession, maturitySnapshotBaseline }; 
+    return { chat, journal, coverage, questions, mode, twinStance, documentCapsules, fieldScans, contextAssembly, moveCards, pendingMoveCards, currentMoveId, moveCompareSelection, moveComparisonLens, currentMovePlan, prf22Profile, coachNotes, livingThreads, capabilityLessons, coherencePulse, phenomenologyPulse, firstSession, maturitySnapshotBaseline, compatibilityImport }; 
   }
 
   async function handleImportTwinMemoryFile(event){
@@ -7939,10 +8165,15 @@ Return only valid JSON with this exact shape:
       }
       
       if(isStandaloneDailyPulseJSON(data)){
-  importStandaloneDailyPulseJSON(data);
-  return;
-}
-      const restored = validateImportPayload(data);
+        importStandaloneDailyPulseJSON(data);
+        return;
+      }
+      if(isPrf22ProfileJSON(data)){
+        importPrf22ProfileData(data, file.name);
+        return;
+      }
+      const adapted = adaptSupportedJSONForNavigator(data, file.name);
+      const restored = validateImportPayload(adapted);
       const currentCount = getChat().length + getJournal().length;
       const msg = currentCount
         ? 'This will replace the current Twin memory in this browser with the imported file. Continue?'
@@ -8160,6 +8391,7 @@ Return only valid JSON with this exact shape:
     const c = plan.collections;
     box.style.display = 'block';
     box.innerHTML = '<div style="font-weight:900; color:var(--gold); margin-bottom:6px;">Merge Preview: ' + escapeHtml(plan.fileName) + '</div>'
+      + (plan.imported && plan.imported.compatibilityImport ? '<p><strong>Recognized format:</strong> ' + escapeHtml(plan.imported.compatibilityImport.sourceFormat || 'compatibility import') + '. Converted records remain labeled by source; no missing signal is treated as observed.</p>' : '')
       + '<p>This will add new records from the selected JSON without erasing the current browser memory. Existing records with matching IDs or matching content are skipped unless the imported version appears newer.</p>'
       + '<ul class="help-list">'
       + mergeStatsLine('Conversation turns', c.chat)
@@ -8196,7 +8428,8 @@ Return only valid JSON with this exact shape:
       return;
     }
 
-    const restored = validateImportPayload(data);
+    const adapted = adaptSupportedJSONForNavigator(data, file.name);
+    const restored = validateImportPayload(adapted);
     pendingMergeImportPlan = buildMergeImportPlan(restored, file.name);
     renderMergeImportPreview(pendingMergeImportPlan);
 
@@ -10843,7 +11076,7 @@ console.info('Navigator build loaded:', window.NAV_FALL_2026_BUILD);
     }
     // Full Navigator export — use existing merge logic
     try {
-      var restored = validateImportPayload(data);
+      var restored = validateImportPayload(adaptSupportedJSONForNavigator(data, syncState.receivedLabel || 'sync payload'));
       // Inline merge (same as handleMergeTwinMemoryFile confirm path)
       try { localStorage.setItem(KEYS.preMergeBackup, JSON.stringify(buildNavigatorBackupPayload())); } catch(e) {}
       setChat(mergeCollection(getChat(), restored.chat, 'chat').items);
@@ -10871,7 +11104,7 @@ console.info('Navigator build loaded:', window.NAV_FALL_2026_BUILD);
     if (!syncState.receivedData) return;
     if (!confirm('Replace your current Navigator memory with the received data? Export a backup first if you want to keep what is here now.')) return;
     try {
-      var restored = validateImportPayload(syncState.receivedData);
+      var restored = validateImportPayload(adaptSupportedJSONForNavigator(syncState.receivedData, syncState.receivedLabel || 'sync payload'));
       setChat(restored.chat);
       setJournal(restored.journal);
       setCoverage(restored.coverage);
