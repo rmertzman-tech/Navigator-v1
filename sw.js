@@ -1,8 +1,8 @@
 // The Navigator — Ethics Beyond Boundaries
-// Fall 2026 v24 import-compatibility-candidate service worker
+// Fall 2026 v25 PRF import-button hotfix candidate service worker
 // Purpose: lightweight offline cache for the single-file Navigator PWA.
 
-const CACHE_NAME = 'navigator-fall-2026-v24-import-compatibility-candidate';
+const CACHE_NAME = 'navigator-fall-2026-v25-prf-import-button-hotfix-candidate';
 
 const CORE_ASSETS = [
   './',

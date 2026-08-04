@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta name="navigator-build" content="navigator-fall-2026-v24-import-compatibility-candidate" />
+  <meta name="navigator-build" content="navigator-fall-2026-v25-prf-import-button-hotfix-candidate" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Navigator — Ethics Beyond Boundaries</title>
@@ -3995,6 +3995,21 @@ This checkpoint is a student-generated engagement snapshot. It is not an automat
     ];
     box.innerHTML = '<div class="profile-card"><div class="profile-head"><div><div class="profile-title">Imported PRF-22 Profile</div><div class="profile-subtitle">' + escapeHtml(p.fileName || p.version || 'local profile') + '</div></div><span class="pill"><span class="dot ' + (p.includeInTwin === false ? 'wait' : 'ok') + '"></span>' + (p.includeInTwin === false ? 'Local only' : 'Twin summary on') + '</span></div><div class="capsule-tags">' + top + '</div><div class="profile-grid">' + metrics.map(m => '<div class="profile-metric"><div class="profile-metric-label">' + escapeHtml(m[0]) + '</div><div class="profile-metric-value">' + escapeHtml(String(m[1])) + '</div></div>').join('') + '</div><div class="profile-summary">' + escapeHtml(p.summary || '') + '</div><div class="profile-warning">Use this as a starting moral topology, not a fixed identity. The Twin should ask whether the profile fits lived experience before relying on it.</div></div>';
   }
+function triggerImportPrf22Profile(){
+  const input = document.getElementById('import-prf22-file');
+  if(!input){
+    alert('The PRF-22 file chooser is unavailable in this build. Reload the page and try again.');
+    return false;
+  }
+  // Clearing the prior value lets a student select the same JSON file again after
+  // cancelling or correcting an earlier import attempt. The click remains inside
+  // the original user gesture, which is required by Safari and other browsers.
+  input.value = '';
+  input.click();
+  return true;
+}
+window.triggerImportPrf22Profile = triggerImportPrf22Profile;
+
 async function handleImportPrf22File(event){
   const input = event && event.target;
   const file = input && input.files && input.files[0];
