@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta name="navigator-build" content="navigator-fall-2026-rc1" />
+  <meta name="navigator-build" content="navigator-fall-2026-corrigibility-2-prototype" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Navigator — Ethics Beyond Boundaries</title>
@@ -1429,6 +1429,38 @@
 
 
 
+    /* CORRIGIBILITY-2: bounded authority, phenomenological veto, and pending memory */
+    .corrigibility-strip {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-width: 1px;
+      border-style: solid;
+      border-color: rgba(13,94,87,.28);
+      border-radius: 10px;
+      background: rgba(13,94,87,.07);
+      font-size: .82rem;
+      line-height: 1.55;
+    }
+    .corrigibility-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; align-items:center; }
+    .corrigibility-mode-label { font-size:.74rem; color:var(--muted); }
+    .epistemic-label { display:inline-block; margin-left:6px; font-size:.67rem; color:var(--muted); font-weight:500; }
+    .msg.rejected-output { opacity:.62; }
+    .msg.rejected-output .meta::after { content:' · not in active map'; font-weight:500; }
+    .msg-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+    .msg-actions .btn { padding:4px 7px; font-size:.68rem; }
+    .pending-learning-panel { display:none; margin-top:10px; }
+    .pending-learning-card {
+      margin-top:8px;
+      padding:10px 12px;
+      border-width:1px;
+      border-style:solid;
+      border-color:rgba(201,168,76,.42);
+      border-radius:10px;
+      background:rgba(201,168,76,.08);
+    }
+    .pending-learning-title { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+    .pending-learning-text { margin-top:5px; font-size:.88rem; line-height:1.55; }
+    .stop-visible { display:inline-flex !important; }
     /* NAV-FALL-2026-23: safety, consent, and production-release controls */
     .support-float {
       position: fixed;
@@ -2088,7 +2120,18 @@
         <div class="chat-input-row">
           <textarea id="chat-input" placeholder="Reply to your Twin…" onkeydown="handleInputKey(event)" aria-label="Reply to your Twin"></textarea>
           <button id="send-btn" class="btn primary ai-feature-action" type="button" onclick="sendToTwin()">Send</button>
+          <button id="stop-twin-btn" class="btn danger" type="button" onclick="stopTwinRequest()" style="display:none">Stop</button>
         </div>
+        <div class="corrigibility-strip" id="corrigibility-strip">
+          <strong>Your Twin can be wrong.</strong> AI interpretations stay conversational unless you keep a proposed learning. You can also narrow the next reply without explaining why.
+          <div class="corrigibility-actions">
+            <button class="btn small ghost" type="button" onclick="setCorrigibilityMode('literal')">Stay literal</button>
+            <button class="btn small ghost" type="button" onclick="setCorrigibilityMode('question_only')">Just ask me a question</button>
+            <button class="btn small ghost" type="button" onclick="setCorrigibilityMode('default')">Return to normal</button>
+            <span id="corrigibility-mode-label" class="corrigibility-mode-label">Mode: normal</span>
+          </div>
+        </div>
+        <div id="pending-learning-panel" class="pending-learning-panel" aria-live="polite"></div>
       </div>
         <aside class="side-panel">
         <div class="card">
@@ -2443,8 +2486,8 @@
             <div class="card-title-row">
               <div>
                 <div class="card-title">Twin Journal</div>
-                <div class="card-desc">After every second substantial human message, the Twin adds one cautious learning about itself.</div>
-                <details class="help-note"><summary>What is this?</summary><div class="help-note-body"><p>The Twin Journal is a list of brief learnings the Twin has assembled. You can edit or delete entries. It is intended to help the Twin grow without forcing direct self-examination.</p></div></details>
+                <div class="card-desc">After every second substantial human message, the Twin may propose one cautious learning. It becomes Journal memory only if you keep it.</div>
+                <details class="help-note"><summary>What is this?</summary><div class="help-note-body"><p>The Twin Journal contains learnings you have kept or authored. AI-proposed learnings wait for your review first. You can edit or delete kept entries at any time.</p></div></details>
               </div>
               <button id="toggle-journal" class="btn small ghost collapse-toggle" type="button" onclick="togglePanel('journal')">Expand</button>
             </div>
@@ -3071,7 +3114,7 @@ function countWords(text){
 
   const ENABLE_PWA = true;
   const DEFAULT_BACKEND = 'https://ucp-backend-4dig.onrender.com/api/claude-proxy';
-  const APP_VERSION = 'The Navigator — Ethics Beyond Boundaries / Fall 2026 RC1';
+  const APP_VERSION = 'The Navigator — Ethics Beyond Boundaries / CORRIGIBILITY-2 prototype';
 
   const NAV_CONFIG = {
     productionMode: true,
@@ -3089,7 +3132,7 @@ function countWords(text){
     coachAiEnabled: true,
     documentAiEnabled: true,
     crisisInterruptionEnabled: true,
-    releaseChannel: 'safety-candidate'
+    releaseChannel: 'corrigibility-prototype'
   };
 
   document.title = NAV_CONFIG.appTitle;
@@ -3138,7 +3181,10 @@ function countWords(text){
     firstSession: 'navigator_twin_v3_6c_first_session',
     maturitySnapshotBaseline: 'navigator_twin_v3_6e2_maturity_snapshot_baseline',
     installId: 'navigator_twin_v3_6e2_install_id',
-    chapterImports: 'navigator_twin_v3_6e4_chapter_imports'
+    chapterImports: 'navigator_twin_v3_6e4_chapter_imports',
+    pendingLearnings: 'navigator_corrigibility_v1_pending_learnings',
+    rejectedInferenceTombstones: 'navigator_corrigibility_v1_rejected_inference_tombstones',
+    corrigibilityMode: 'navigator_corrigibility_v1_mode'
   };
 
   const DIMENSIONS = [
@@ -3374,6 +3420,158 @@ function countWords(text){
     if(isNaN(d.getTime())){ label.textContent = 'Saved locally'; return; }
     label.textContent = 'Saved locally ' + d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
   }
+
+  // CORRIGIBILITY-2 CORE STATE START
+  function getPendingLearnings(){ return getStored(KEYS.pendingLearnings, []); }
+  function setPendingLearnings(items){ setStored(KEYS.pendingLearnings, Array.isArray(items) ? items.slice(-8) : []); }
+  function getRejectedInferenceTombstones(){ return getStored(KEYS.rejectedInferenceTombstones, []); }
+  function setRejectedInferenceTombstones(items){ setStored(KEYS.rejectedInferenceTombstones, Array.isArray(items) ? items.slice(-30) : []); }
+  function getCorrigibilityMode(){
+    try { return localStorage.getItem(KEYS.corrigibilityMode) || 'default'; } catch(e) { return 'default'; }
+  }
+  function setCorrigibilityMode(mode){
+    const allowed = ['default','literal','question_only'];
+    const next = allowed.indexOf(mode) >= 0 ? mode : 'default';
+    try { localStorage.setItem(KEYS.corrigibilityMode, next); } catch(e) {}
+    renderCorrigibilityMode();
+    announceToScreenReader(next === 'literal' ? 'Twin set to stay literal.' : next === 'question_only' ? 'Twin set to ask one question only.' : 'Twin returned to normal reflection mode.');
+  }
+  window.setCorrigibilityMode = setCorrigibilityMode;
+
+  function renderCorrigibilityMode(){
+    const label = document.getElementById('corrigibility-mode-label');
+    if(!label) return;
+    const mode = getCorrigibilityMode();
+    label.textContent = mode === 'literal' ? 'Mode: stay literal' : mode === 'question_only' ? 'Mode: one question only' : 'Mode: normal';
+  }
+
+  function buildCorrigibilityModeInstruction(){
+    const mode = getCorrigibilityMode();
+    if(mode === 'literal') return 'INTERACTION MODE — STAY LITERAL: Reflect only explicit user-reported content and system-observed facts. Do not supply hidden causes, motives, diagnoses, mechanisms, deficits, or future-failure stories. Ask before interpreting.';
+    if(mode === 'question_only') return 'INTERACTION MODE — QUESTION ONLY: Return one neutral, concrete question anchored only in what the user explicitly reported. Do not add a causal menu, interpretation, warning, advice, or summary unless immediate safety routing independently requires it.';
+    return 'INTERACTION MODE — NORMAL: Use bounded reflection. Interpretations remain provisional and must yield to user correction.';
+  }
+
+ const GOOSE_MIDAS_TUTOR_CONTRACT = `GENERATIVITY GUARDIAN / BOUNDED MIDAS SENTINEL — R3 EVIDENCE-BOUND EXPLANATION:
+- PRECEDENCE: immediate-safety routing and an active user-selected literal/question-only mode remain higher priority. Otherwise this contract governs interpretation and response form.
+- EVIDENCE LEDGER: distinguish (E1) user-reported or user-confirmed facts, (E2) directly recorded system events, and (H) Twin hypotheses. Never present H as E1 or E2.
+- NO-HYPOTHESIS ZONE — CLEAN SUCCESS AND OPEN/UNRESOLVED: if the user reports concrete gains without a reported counter-cost, or presents an ambiguous/open concern without discriminating evidence, do not generate H at all. Do not offer a causal menu, possible hidden losses, nervous-system mechanisms, avoidance/dread/anxiety stories, implicit design stories, unreported burden, or other candidate explanations. Caveating an invented mechanism as “possible” still violates this rule.
+- CLEAN-SUCCESS OUTPUT FORM: first recognize the concrete gains the user actually reported. If the user asks why the success is happening, state that the report supports description of what changed but does not yet identify the cause. Name only relationships directly visible in E1/E2, then ask one neutral question about what the user noticed or what conditions they themselves experienced as supportive. Do not turn improvement into a deficit, compensation, or repair story.
+- OPEN/UNRESOLVED OUTPUT FORM: before discriminating evidence exists, do not list candidate causes, losses, harms, or hidden mechanisms. Ask one neutral question that can distinguish the live possibilities. If the unresolved issue is whether challenge, correction, appeal, or override still works, ask directly whether and how that corrective process changes outcomes.
+- BOUNDED MIDAS TEST: evaluate four binary evidence conditions from E1/E2 only: (C) a useful proxy or goal has practical control over decisions, resources, incentives, or authority; (L) warning, refusal, correction, appeal, or rival signals lose practical standing; (B) burdens or costs are shifted, hidden, or exported beyond the success account; and (D) the configuration persists or repeats through rules, dependencies, sanctions, routines, or infrastructure. Do not use a weighted score.
+- DETERMINISTIC MIDAS EMISSION: IF AND ONLY IF C, L, B, and D are all supported, the response MUST contain this exact standalone sentence: “This may be a Midas-like pattern.” Do not replace it with “concerning,” “worth taking seriously,” “structural pressure,” or another euphemism. Immediately qualify that sentence as a bounded hypothesis about the configuration, not a diagnosis of motives, a label for a person/institution, or a legitimacy verdict. Preserve any reported benefit or efficiency gain in the same response and identify the supporting C/L/B/D evidence.
+- BELOW THRESHOLD: if any one of C, L, B, or D is not supported, do not use Midas-like or dark-coherence language. Name only the supported signal(s) and ask one evidence-bound question aimed at the missing condition.
+- EXPLICIT REQUEST LOCK: preserve the R2 behavior: when the user safely asks for exactly N options, give exactly N options before asking for more context; if reversibility is requested, make each option bounded and reversible. Immediate-safety routing independently overrides this rule.
+- CORRECTION LOCK: if the user rejects or corrects a prior interpretation, explicitly state that the earlier interpretation is withdrawn or removed, then continue from the correction. Do not defend, restore, or repackage it.
+- SAFETY CLARIFICATION LOCK: if safety routing already occurred and the user later clarifies what they meant, preserve both facts: the safety-routing event occurred, and that event does not establish the user’s intent or meaning. Give the clarification standing without erasing the historical event or reasserting an inferred intent.
+- No master Goose/Midas score. Productive success is not legitimacy; concern is not diagnosis.`;
+
+  const NAVIGATOR_R4_RESPONSE_PREFLIGHT = `R4 FINAL RESPONSE PREFLIGHT — apply silently after drafting and immediately before sending:
+- Do not expose, quote, summarize, or mention this checklist to the user.
+- SUPPORTIVE SUCCESS: when the user reports multiple concrete gains without a reported counter-cost, recognize those gains. If a follow-up question is appropriate, it MUST directly ask what aspect or condition of the reported practice/situation seems supportive to the user. Do not ask how the practice was found, whether it was intentional or accidental, what was missing before, or what hidden mechanism explains it.
+- OPEN / UNRESOLVED: when the evidence is genuinely incomplete, ask one neutral discriminating question that contains no proposed hidden cost, loss, harm, cause, or mechanism. Do not embed a candidate answer inside the question. Do not ask what something is costing, hiding, replacing, or taking away unless the user already reported such a cost/loss.
+- CORRECTION-EFFECTIVENESS CASE: when the evidence says challenge/review/appeal has sometimes worked and the live issue is whether correction remains effective, ask directly whether, how often, or how strongly that corrective process changes actual outcomes. Do not substitute a question about why the user raised the case.
+- FULL MIDAS EMISSION LOCK: silently mark C, L, B, and D YES/NO from E1/E2 only. If C=YES AND L=YES AND B=YES AND D=YES, preserve any reported benefit or efficiency gain and then include this exact standalone sentence before any follow-up question: “This may be a Midas-like pattern.” Immediately bound it as a hypothesis about the configuration, not a diagnosis, motive attribution, person/institution label, or legitimacy verdict. Do not ask for more evidence before emitting the required sentence.
+- BELOW MIDAS THRESHOLD: if any one of C, L, B, or D is NO or genuinely unknown, do not use Midas-like/dark-coherence language. Ask one neutral evidence-bound question about the missing condition if a question is useful.
+- FINAL SEND CHECK: do not send the response until the applicable SUPPORTIVE SUCCESS, OPEN/UNRESOLVED, CORRECTION-EFFECTIVENESS, or FULL MIDAS obligation above is satisfied.`;
+  function safeChatForTwin(){
+    return getChat()
+      .filter(m => !(m && m.role === 'assistant' && m.epistemicStatus === 'rejected'))
+      .slice(-10)
+      .map(m => ({
+        id:m.id,
+        role:m.role,
+        content:m.content,
+        provenance:m.provenance || (m.role === 'user' ? 'USER_REPORTED' : m.role === 'assistant' ? 'AI_OUTPUT' : 'SYSTEM_EVENT'),
+        epistemicStatus:m.epistemicStatus || 'conversation_record'
+      }));
+  }
+
+  function safeJournalForTwin(){
+    return getJournal()
+      .filter(e => !e || (e.status !== 'rejected' && e.status !== 'pending'))
+      .slice(-12)
+      .map(e => ({
+        id:e.id,
+        text:e.text,
+        category:e.category,
+        provenance:e.provenance || 'IMPORTED_LEGACY_UNTYPED',
+        status:e.status || 'accepted_legacy',
+        sourceTurnIds:Array.isArray(e.sourceTurnIds) ? e.sourceTurnIds : []
+      }));
+  }
+
+  function makeInferenceTombstone(sourceTurnIds, id){
+    return { id:id || uid('rejected'), sourceTurnIds:Array.isArray(sourceTurnIds) ? sourceTurnIds.slice(0,4) : [], rejectedAt:new Date().toISOString() };
+  }
+
+  function createPendingLearning(item, sourceTurnIds, sourceKind){
+    const text = sanitizeJournalText(item && item.journalEntry);
+    if(!text || text.length < 10) return null;
+    const sourceIds = Array.isArray(sourceTurnIds) ? sourceTurnIds.slice() : [];
+    const pending = getPendingLearnings();
+    const sourceKey = sourceIds.join('|');
+    const duplicate = pending.some(p => (p.sourceTurnIds || []).join('|') === sourceKey || normalizeQuestion(p.text) === normalizeQuestion(text));
+    if(duplicate) return null;
+    const entry = {
+      id:uid('pending_learning'), text, category:(item && item.category) || 'meaning',
+      confidence:Math.max(0,Math.min(1,Number(item && item.confidence) || .65)),
+      sourceTurnIds:sourceIds, sourceKind:sourceKind || 'ai_extraction', provenance:'AI_INFERRED',
+      storageClass:'PENDING_MEMORY', status:'pending', createdAt:new Date().toISOString()
+    };
+    pending.push(entry); setPendingLearnings(pending); renderPendingLearnings();
+    announceToScreenReader('Twin proposed a learning for your review. It has not been added to memory.');
+    return entry;
+  }
+
+  function acceptPendingLearning(id, editFirst){
+    const pending = getPendingLearnings();
+    const item = pending.find(p => p.id === id); if(!item) return;
+    let text = item.text;
+    if(editFirst){ const edited = prompt('Edit this learning before keeping it:', text); if(edited === null) return; text = sanitizeJournalText(edited); }
+    addJournalLearning({ journalEntry:text, category:item.category, confidence:item.confidence }, item.sourceTurnIds, 'USER_CONFIRMED_AI_INFERENCE');
+    setPendingLearnings(pending.filter(p => p.id !== id)); renderAll();
+    announceToScreenReader('Learning kept in Twin Journal.');
+  }
+  window.acceptPendingLearning = acceptPendingLearning;
+
+  function rejectPendingLearning(id){
+    const pending = getPendingLearnings();
+    const item = pending.find(p => p.id === id); if(!item) return;
+    const tombstones = getRejectedInferenceTombstones(); tombstones.push(makeInferenceTombstone(item.sourceTurnIds, item.id)); setRejectedInferenceTombstones(tombstones);
+    setPendingLearnings(pending.filter(p => p.id !== id));
+    setCorrigibilityMode('literal');
+    addMessage('user','That proposed Twin learning was not what I meant.',{provenance:'USER_REPORTED',epistemicStatus:'control_event',controlEvent:'REJECT_PENDING_LEARNING',targetPendingId:id});
+    renderAll();
+    announceToScreenReader('Learning rejected and removed from active memory.');
+  }
+  window.rejectPendingLearning = rejectPendingLearning;
+
+  function renderPendingLearnings(){
+    const panel = document.getElementById('pending-learning-panel'); if(!panel) return;
+    const pending = getPendingLearnings();
+    if(!pending.length){ panel.style.display='none'; panel.innerHTML=''; return; }
+    panel.style.display='block';
+    panel.innerHTML = '<div class="corrigibility-strip"><strong>Proposed Twin learning — not memory yet.</strong> Keep it only if it fits your lived experience.</div>' + pending.map(p =>
+      '<div class="pending-learning-card"><div class="pending-learning-title">AI inference · pending</div><div class="pending-learning-text">'+escapeHtml(p.text)+'</div><div class="corrigibility-actions">'
+      +'<button class="btn small primary" type="button" onclick="acceptPendingLearning(\''+p.id+'\',false)">Keep this</button>'
+      +'<button class="btn small ghost" type="button" onclick="acceptPendingLearning(\''+p.id+'\',true)">Edit &amp; keep</button>'
+      +'<button class="btn small danger" type="button" onclick="rejectPendingLearning(\''+p.id+'\')">Not what I meant</button>'
+      +'</div></div>'
+    ).join('');
+  }
+
+  function rejectTwinInterpretation(id){
+    const chat=getChat(); const target=chat.find(m => m.id === id && m.role === 'assistant'); if(!target || target.safetyEvent) return;
+    target.epistemicStatus='rejected'; target.rejectedAt=new Date().toISOString(); setChat(chat);
+    const tombstones=getRejectedInferenceTombstones(); tombstones.push(makeInferenceTombstone([id],id)); setRejectedInferenceTombstones(tombstones);
+    setCorrigibilityMode('literal');
+    addMessage('user','That Twin interpretation was not what I meant.',{provenance:'USER_REPORTED',epistemicStatus:'control_event',controlEvent:'NOT_WHAT_I_MEANT',targetTurnId:id});
+    renderChat();
+    announceToScreenReader('Twin interpretation rejected and removed from active context.');
+  }
+  window.rejectTwinInterpretation = rejectTwinInterpretation;
+  // CORRIGIBILITY-2 CORE STATE END
 
   function getSettings(){
     const stored = getStored(KEYS.settings, { backendUrl: DEFAULT_BACKEND });
@@ -4117,20 +4315,27 @@ async function handleImportPrf22File(event){
     const chat = getChat();
     if(!log) return;
     if(chat.length === 0){
-      log.innerHTML = '<div class="msg system">Start the Twin when you are ready. The Twin should ask one question at a time and build its journal from what you choose to share.</div>';
+      log.innerHTML = '<div class="msg system">Start the Twin when you are ready. The Twin should ask one question at a time. Proposed learnings must be kept by you before they become Twin Journal memory.</div>';
       return;
     }
     log.innerHTML = chat.map(m => {
       const label = m.role === 'user' ? 'You' : m.role === 'assistant' ? 'Twin' : 'System';
       const cls = m.role === 'user' ? 'user' : m.role === 'assistant' ? 'twin' : 'system';
-      return '<div class="msg '+cls+'"><span class="meta">'+label+'</span>'+escapeHtml(m.content)+'</div>';
+      const rejected = m.role === 'assistant' && m.epistemicStatus === 'rejected';
+      const provenance = m.provenance || (m.role === 'user' ? 'USER_REPORTED' : m.role === 'assistant' ? 'AI_OUTPUT' : 'SYSTEM_EVENT');
+      let actions = '';
+      if(m.role === 'assistant' && !m.safetyEvent && !rejected){
+        actions = '<div class="msg-actions"><button class="btn small ghost" type="button" onclick="rejectTwinInterpretation(\''+m.id+'\')">Not what I meant</button><button class="btn small ghost" type="button" onclick="setCorrigibilityMode(\'literal\')">Stay literal</button></div>';
+      }
+      return '<div class="msg '+cls+(rejected?' rejected-output':'')+'"><span class="meta">'+label+'<span class="epistemic-label">'+escapeHtml(provenance)+'</span></span>'+escapeHtml(m.content)+actions+'</div>';
     }).join('');
     log.scrollTop = log.scrollHeight;
   }
 
-  function addMessage(role, content){
+  function addMessage(role, content, meta){
     const chat = getChat();
-    chat.push({ id: uid('turn'), role, content, timestamp: new Date().toISOString() });
+    const defaults = { provenance: role === 'user' ? 'USER_REPORTED' : role === 'assistant' ? 'AI_OUTPUT' : 'SYSTEM_EVENT', epistemicStatus:'conversation_record' };
+    chat.push(Object.assign({ id: uid('turn'), role, content, timestamp: new Date().toISOString() }, defaults, meta || {}));
     setChat(chat);
     renderOnboarding();
     renderChat();
@@ -4181,13 +4386,14 @@ async function handleImportPrf22File(event){
     const journal = getJournal();
     if(!list) return;
     if(journal.length === 0){
-      list.innerHTML = '<div class="empty">No journal entries yet. After two substantial replies, the Twin will add one cautious learning here.</div>';
+      list.innerHTML = '<div class="empty">No kept journal entries yet. The Twin may propose a cautious learning after two substantial replies, but it is not memory until you keep it.</div>';
       return;
     }
     list.innerHTML = journal.map((e, i) => {
+      const provenance = e.provenance || 'IMPORTED_LEGACY_UNTYPED';
       return '<div class="journal-entry">'
         + '<div class="journal-entry-text">' + (i + 1) + '. ' + escapeHtml(e.text) + '</div>'
-        + '<div class="journal-entry-meta">' + escapeHtml(e.category || 'uncategorized') + ' · confidence ' + Math.round((e.confidence || .5) * 100) + '%</div>'
+        + '<div class="journal-entry-meta">' + escapeHtml(e.category || 'uncategorized') + ' · ' + escapeHtml(provenance) + ' · confidence ' + Math.round((e.confidence || .5) * 100) + '%</div>'
         + '<div class="entry-actions">'
         + '<button class="btn small ghost" type="button" onclick="editJournalEntry(\''+e.id+'\')">Edit</button>'
         + '<button class="btn small danger" type="button" onclick="deleteJournalEntry(\''+e.id+'\')">Delete</button>'
@@ -4881,7 +5087,7 @@ function importStandaloneDailyPulseJSON(pulse){
     const raw = el ? String(el.value || '').trim() : '';
     if(raw.length < 8){ alert('Add one short insight first. It can be rough and revisable.'); return; }
     firstSessionSaveNote('insight', raw);
-    addJournalLearning({ journalEntry:raw, category:'meaning', confidence:.62 }, []);
+    addJournalLearning({ journalEntry:raw, category:'meaning', confidence:.62 }, [], 'USER_AUTHORED');
     const st = getFirstSessionState(); st.step = Math.max(st.step, 3); setFirstSessionState(st);
     renderAll(); showWorkspace('firstsession'); renderFirstSession();
   }
@@ -6695,6 +6901,8 @@ function importStandaloneDailyPulseJSON(pulse){
     renderCoherence();
     renderTwinCoLivingControls();
     renderJournal();
+    renderPendingLearnings();
+    renderCorrigibilityMode();
     renderPendingCapsule();
     renderCapsules();
     renderPrf22Profile();
@@ -6726,25 +6934,39 @@ function importStandaloneDailyPulseJSON(pulse){
     if(lab){ lab.textContent = label || 'Backend not tested'; }
   }
 
-  async function callBackend(system, content, maxTokens){
+  async function callBackend(system, content, maxTokens, options){
     if(!NAV_CONFIG.aiFeaturesEnabled) throw makeAiGateError('AI_DISABLED', 'AI-assisted tools are disabled for this release.');
     const consented = await ensureAiProcessingConsent();
     if(!consented) throw makeAiGateError('AI_CONSENT_DECLINED', 'AI processing was not started.');
     const endpoint = DEFAULT_BACKEND;
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: maxTokens || 900,
-        system: system,
-        messages: [{ role:'user', content: content }]
-      }),
-      signal: AbortSignal.timeout(30000),
-      credentials: 'omit',
-      cache: 'no-store',
-      referrerPolicy: 'no-referrer'
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const externalSignal = options && options.signal;
+    const relayAbort = () => controller.abort();
+    if(externalSignal){
+      if(externalSignal.aborted) controller.abort();
+      else externalSignal.addEventListener('abort', relayAbort, { once:true });
+    }
+    let res;
+    try {
+      res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: maxTokens || 900,
+          system: system,
+          messages: [{ role:'user', content: content }]
+        }),
+        signal: controller.signal,
+        credentials: 'omit',
+        cache: 'no-store',
+        referrerPolicy: 'no-referrer'
+      });
+    } finally {
+      clearTimeout(timeoutId);
+      if(externalSignal) externalSignal.removeEventListener('abort', relayAbort);
+    }
     const text = await res.text();
     if(!res.ok) throw new Error('HTTP_' + res.status + ': ' + text.slice(0, 500));
     let data;
@@ -6777,6 +6999,10 @@ You are not a therapist, counselor, doctor, legal adviser, financial adviser, gr
 Current relationship maturity: ${maturity.name}. ${maturity.text}
 Current conversation stance: ${stance.label}. Use this stance: ${stance.prompt}.
 
+${GOOSE_MIDAS_TUTOR_CONTRACT}
+
+${buildCorrigibilityModeInstruction()}
+
 Core evolution from earlier versions:
 - Do NOT keep using the same formula of serious recognition, synthesis, and “what do you want next?”
 - Vary your conversational form. Sometimes be a witness, sometimes a memory keeper, sometimes a pattern spotter, sometimes a Pulse interpreter, sometimes a Current Move companion, sometimes a gentle challenger, sometimes a Beauty/Awe inviter, sometimes a co-designer, and sometimes a philosophy/science explorer.
@@ -6785,7 +7011,7 @@ Core evolution from earlier versions:
 - Notice progress, endurance, blocked agency, and possible dark coherence.
 
 Dark coherence caution:
-A plan may be coherent because it reduces anxiety or stabilizes survival, while still narrowing future agency, joy, openness, identity integrity, or ethical courage. If this may be happening, ask gently and concretely. Do not accuse.
+Do not search for hidden dark coherence in a clean success account. When user-reported or user-confirmed evidence shows a repeated success pattern accompanied by burden, narrowing options, or blocked warning/correction, ask one evidence-bound question. Reserve a Midas-like warning for converging evidence under the contract above.
 
 Beauty/Awe principle:
 Beauty, awe, meaning, humor, sacredness, creativity, gratitude, nature, music, and wonder are not decorative. They can reopen the field and help the user remain coherent when pressure narrows experience.
@@ -6802,12 +7028,12 @@ Response rules:
 - Ask exactly one clear, concrete question at the end unless the user explicitly requests a list, plan, or essay.
 - If the user expresses immediate danger to self or others, stop ordinary reflection. State that Navigator is not monitored and cannot contact help. Direct the user to call 911 for immediate danger or call/text 988 for suicidal crisis or emotional distress, and encourage contacting a nearby trusted person. Do not ask for methods, means, or detailed plans.
 
-Essential design principle: The Twin is the coherence core. Guide modules, Pulse, Field Maps, and Move Cards are aids. The Twin should help the user return to themselves and choose the next agency-preserving move.`;
+Essential design principle: The Twin is the coherence core. Guide modules, Pulse, Field Maps, and Move Cards are aids. The Twin should help the user return to themselves and choose the next agency-preserving move.
+${NAVIGATOR_R4_RESPONSE_PREFLIGHT}`;
   }
-
   function buildTwinContent(userText){
-    const chat = getChat().slice(-10);
-    const journal = getJournal();
+    const chat = safeChatForTwin();
+    const journal = safeJournalForTwin();
     const coverage = getCoverage();
     const questions = getQuestions().slice(-18);
     const capsules = getCapsules().slice(-8).map(c => ({ title:c.title, mode:c.mode, summary:c.summary, themes:c.themes, styleNotes:c.styleNotes, projectPurpose:c.projectPurpose, suggestedJournalEntry:c.suggestedJournalEntry }));
@@ -6829,6 +7055,7 @@ Essential design principle: The Twin is the coherence core. Guide modules, Pulse
       mode: 'twin_v3_2_co_living',
       conversationMode: mode,
       twinStance: getTwinStanceDefinition(getTwinStance()),
+      corrigibilityMode: getCorrigibilityMode(),
       twinMaturity: deriveTwinMaturity(),
       continuitySignals: buildTwinContinuitySignals(),
       coherenceStage: stage.name,
@@ -6850,8 +7077,8 @@ Essential design principle: The Twin is the coherence core. Guide modules, Pulse
       livingThreads: livingThreads,
       coherencePulseSummary: coherencePulseSummary,
       recentCoherencePulse: recentCoherencePulse,
-      instruction: 'Respond as the Co-Living Twin. Vary your conversational form. Use memory and continuity signals when relevant. Do not repeat previous questions. Ask exactly one concrete question. Do not return JSON; return conversational prose.'
-    }, null, 2);
+      instruction: 'Respond as the Co-Living Twin. Use only the epistemic standing supplied here. User-reported and user-confirmed material can guide continuity; AI output and legacy-untyped material are not identity facts. Follow the Generativity Guardian / Bounded Midas Sentinel contract, the current corrigibility mode, and the R4 final response preflight. Do not repeat previous questions. ' +
+      'When the R4 preflight calls for a question, ask exactly one concrete question unless the user explicitly asks for a list, plan, or essay. If full C/L/B/D convergence is supported, include the exact required Midas sentence before any follow-up question. Do not return JSON; return conversational prose.'    }, null, 2);
   }
 
   function normalizeQuestion(q){
@@ -7019,14 +7246,48 @@ Essential design principle: The Twin is the coherence core. Guide modules, Pulse
     }
   }
 
+  // CORRIGIBILITY-2 TWIN REQUEST CONTROL START
+  let twinRequestGeneration = 0;
+  let twinActiveController = null;
+  function setTwinRequestActive(active){
+    const stop = document.getElementById('stop-twin-btn');
+    const send = document.getElementById('send-btn');
+    if(stop) stop.classList.toggle('stop-visible', !!active);
+    if(send) send.disabled = !!active || !NAV_CONFIG.aiFeaturesEnabled;
+  }
+  function beginTwinRequest(){
+    twinRequestGeneration += 1;
+    if(twinActiveController) twinActiveController.abort();
+    twinActiveController = new AbortController();
+    setTwinRequestActive(true);
+    return { generation:twinRequestGeneration, controller:twinActiveController };
+  }
+  function finishTwinRequest(generation){
+    if(generation !== twinRequestGeneration) return;
+    twinActiveController = null;
+    setTwinRequestActive(false);
+  }
+  function stopTwinRequest(){
+    if(!twinActiveController) return;
+    twinRequestGeneration += 1;
+    twinActiveController.abort();
+    twinActiveController = null;
+    setTwinRequestActive(false);
+    const chat=getChat();
+    if(chat.length && chat[chat.length-1].role==='system' && String(chat[chat.length-1].content||'').indexOf('Twin is assembling')>=0){ chat.pop(); setChat(chat); }
+    addMessage('system','Stopped. No late Twin response from that request will be added to your active conversation.',{provenance:'SYSTEM_EVENT',epistemicStatus:'control_event'});
+  }
+  window.stopTwinRequest = stopTwinRequest;
+  // CORRIGIBILITY-2 TWIN REQUEST CONTROL END
+
   async function sendToTwin(){
     const input = document.getElementById('chat-input');
     const text = input ? input.value.trim() : '';
     if(!text) return;
     if(input) input.value = '';
-    addMessage('user', text);
+    addMessage('user', text, { provenance:'USER_REPORTED', epistemicStatus:'user_report' });
     if(NAV_CONFIG.crisisInterruptionEnabled && detectImmediateSafetyConcern(text)){
-      addMessage('assistant', immediateSafetyTwinMessage());
+      addMessage('assistant', immediateSafetyTwinMessage(), { provenance:'SYSTEM_EVENT', epistemicStatus:'safety_event', safetyEvent:true });
       setTimeout(openNavigatorSupport, 80);
       renderAll();
       return;
@@ -7035,10 +7296,12 @@ Essential design principle: The Twin is the coherence core. Guide modules, Pulse
       addMessage('system', 'AI-assisted Twin is temporarily unavailable. Your message remains in this browser. Use local Navigator tools or try again when your instructor confirms the service is available.');
       return;
     }
-    addMessage('system', 'Twin is assembling…');
+    const request = beginTwinRequest();
+    addMessage('system', 'Twin is assembling…', { provenance:'SYSTEM_EVENT', epistemicStatus:'transient' });
 
     try {
-      let reply = await callBackend(buildTwinSystemPrompt(), buildTwinContent(text), 900);
+      let reply = await callBackend(buildTwinSystemPrompt(), buildTwinContent(text), 900, { signal:request.controller.signal });
+      if(request.generation !== twinRequestGeneration) return;
       if(!reply) throw new Error('Empty backend reply');
       const q = extractLastQuestion(reply);
       if(q && wasRecentlyAsked(q)){
@@ -7047,16 +7310,20 @@ Essential design principle: The Twin is the coherence core. Guide modules, Pulse
         reply = reply.replace(/[\s.]+$/, '.');
         reply += ' ' + f.question;
       }
-      replaceLastSystemWithAssistant(reply);
+      replaceLastSystemWithAssistant(reply, { provenance:'AI_OUTPUT', epistemicStatus:'conversation_record' });
       rememberQuestionFromReply(reply);
     } catch(e) {
+      if(request.generation !== twinRequestGeneration || (e && e.name === 'AbortError')) return;
       if(isAiGateError(e)){
-        replaceLastSystemWithAssistant('The AI-assisted Twin did not run. No request was sent. Your message remains saved locally in this browser.');
+        replaceLastSystemWithAssistant('The AI-assisted Twin did not run. No request was sent. Your message remains saved locally in this browser.', { provenance:'SYSTEM_EVENT', epistemicStatus:'control_event' });
         renderAll();
+        finishTwinRequest(request.generation);
         return;
       }
-      replaceLastSystemWithAssistant(fallbackTwinReply(text));
+      replaceLastSystemWithAssistant(fallbackTwinReply(text), { provenance:'AI_OUTPUT', epistemicStatus:'conversation_record', fallback:true });
       setBackendStatus('bad', 'Backend unavailable');
+    } finally {
+      finishTwinRequest(request.generation);
     }
 
     await maybeExtractLearning();
@@ -7064,25 +7331,25 @@ Essential design principle: The Twin is the coherence core. Guide modules, Pulse
   }
   window.sendToTwin = sendToTwin;
 
-  function replaceLastSystemWithAssistant(content){
+  function replaceLastSystemWithAssistant(content, meta){
     const chat = getChat();
     if(chat.length && chat[chat.length - 1].role === 'system' && chat[chat.length - 1].content.indexOf('Twin is assembling') >= 0){
       chat.pop();
     }
-    chat.push({ id: uid('turn'), role: 'assistant', content, timestamp: new Date().toISOString() });
+    chat.push(Object.assign({ id: uid('turn'), role: 'assistant', content, timestamp: new Date().toISOString(), provenance:'AI_OUTPUT', epistemicStatus:'conversation_record' }, meta || {}));
     setChat(chat);
     renderChat();
   }
 
   function substantialUserMessages(){
-    return getChat().filter(m => m.role === 'user' && (m.content || '').trim().length >= 24);
+    return getChat().filter(m => m.role === 'user' && !m.controlEvent && (m.content || '').trim().length >= 24);
   }
 
   async function maybeExtractLearning(){
     const users = substantialUserMessages();
     if(users.length === 0 || users.length % 2 !== 0) return;
     const lastTwo = users.slice(-2);
-    const already = getJournal().some(e => Array.isArray(e.sourceTurnIds) && e.sourceTurnIds.indexOf(lastTwo[1].id) >= 0);
+    const already = getJournal().some(e => Array.isArray(e.sourceTurnIds) && e.sourceTurnIds.indexOf(lastTwo[1].id) >= 0) || getPendingLearnings().some(e => Array.isArray(e.sourceTurnIds) && e.sourceTurnIds.indexOf(lastTwo[1].id) >= 0);
     if(already) return;
 
     let item = null;
@@ -7105,7 +7372,7 @@ Return only valid JSON with this exact shape:
       item = localExtractLearning(lastTwo.map(m => m.content).join(' '));
     }
     if(item && item.journalEntry){
-      addJournalLearning(item, lastTwo.map(m => m.id));
+      createPendingLearning(item, lastTwo.map(m => m.id), 'conversation_extraction');
     }
   }
 
@@ -7152,7 +7419,7 @@ Return only valid JSON with this exact shape:
     return { journalEntry: phrase, category, confidence: .52 };
   }
 
-  function addJournalLearning(item, sourceTurnIds){
+  function addJournalLearning(item, sourceTurnIds, provenance){
     const text = sanitizeJournalText(item.journalEntry);
     if(!text || text.length < 10) return;
     const journal = getJournal();
@@ -7165,13 +7432,17 @@ Return only valid JSON with this exact shape:
       category: item.category || 'meaning',
       confidence: Math.max(0, Math.min(1, Number(item.confidence) || .65)),
       sourceTurnIds: sourceTurnIds || [],
+      provenance: provenance || 'USER_AUTHORED',
+      storageClass: 'ACTIVE_MEMORY',
+      status: 'accepted',
+      acceptedAt: new Date().toISOString(),
       timestamp: new Date().toISOString()
     });
     setJournal(journal);
     const cov = getCoverage();
     cov[item.category || 'meaning'] = Math.min(5, (cov[item.category || 'meaning'] || 0) + 1);
     setCoverage(cov);
-    addMessage('system', 'Twin Journal updated: “' + text + '.”');
+    addMessage('system', 'Twin Journal kept: “' + text + '.”', { provenance:'SYSTEM_EVENT', epistemicStatus:'control_event' });
   }
 
   function editJournalEntry(id){
@@ -7211,6 +7482,10 @@ Return only valid JSON with this exact shape:
       exportedAt: new Date().toISOString(),
       chat: getChat(),
       journal: getJournal(),
+      pendingLearnings: getPendingLearnings(),
+      rejectedInferenceTombstones: getRejectedInferenceTombstones(),
+      corrigibilityMode: getCorrigibilityMode(),
+      corrigibilitySchemaVersion: 'corrigibility-2',
       coverage: getCoverage(),
       questions: getQuestions(),
       documentCapsules: getCapsules(),
@@ -7710,23 +7985,66 @@ Return only valid JSON with this exact shape:
 
   function normalizeImportedMessage(m){
     const role = ['user','assistant','system'].includes(m && m.role) ? m.role : 'system';
-    return {
+    const provenance = String((m && m.provenance) || (role === 'user' ? 'USER_REPORTED' : role === 'assistant' ? 'AI_OUTPUT' : 'SYSTEM_EVENT')).slice(0,80);
+    const status = String((m && m.epistemicStatus) || 'conversation_record').slice(0,80);
+    const out = {
       id: (m && m.id) || uid('turn'),
       role,
       content: String((m && m.content) || '').slice(0, 12000),
+      provenance,
+      epistemicStatus: status,
       timestamp: (m && m.timestamp) || new Date().toISOString()
     };
+    if(m && m.controlEvent) out.controlEvent = String(m.controlEvent).slice(0,80);
+    if(m && m.targetTurnId) out.targetTurnId = String(m.targetTurnId).slice(0,120);
+    if(m && m.safetyEvent) out.safetyEvent = true;
+    if(m && m.fallback) out.fallback = true;
+    if(m && m.rejectedAt) out.rejectedAt = String(m.rejectedAt).slice(0,80);
+    return out;
   }
 
   function normalizeImportedJournalEntry(e){
     const cat = DIMENSIONS.some(d => d.key === (e && e.category)) ? e.category : 'meaning';
-    return {
+    const provenance = String((e && e.provenance) || 'IMPORTED_LEGACY_UNTYPED').slice(0,80);
+    const status = ['accepted','rejected','pending'].includes(e && e.status) ? e.status : 'accepted_legacy';
+    const out = {
       id: (e && e.id) || uid('journal'),
       text: sanitizeJournalText((e && e.text) || (e && e.journalEntry) || ''),
       category: cat,
       confidence: Math.max(0, Math.min(1, Number(e && e.confidence) || .65)),
-      sourceTurnIds: Array.isArray(e && e.sourceTurnIds) ? e.sourceTurnIds : [],
+      sourceTurnIds: Array.isArray(e && e.sourceTurnIds) ? e.sourceTurnIds.slice(0,20) : [],
+      provenance,
+      storageClass: String((e && e.storageClass) || 'ACTIVE_MEMORY').slice(0,80),
+      status,
       timestamp: (e && e.timestamp) || new Date().toISOString()
+    };
+    if(e && e.acceptedAt) out.acceptedAt = String(e.acceptedAt).slice(0,80);
+    if(e && e.rejectedAt) out.rejectedAt = String(e.rejectedAt).slice(0,80);
+    if(e && e.source) out.source = String(e.source).slice(0,120);
+    return out;
+  }
+
+  function normalizeImportedPendingLearning(e){
+    if(!e || typeof e !== 'object') return null;
+    const text = sanitizeJournalText(e.text || e.journalEntry || '');
+    if(text.length < 8) return null;
+    const cat = DIMENSIONS.some(d => d.key === e.category) ? e.category : 'meaning';
+    return {
+      id:e.id || uid('pending_learning'), text, category:cat,
+      confidence:Math.max(0,Math.min(1,Number(e.confidence) || .65)),
+      sourceTurnIds:Array.isArray(e.sourceTurnIds) ? e.sourceTurnIds.slice(0,20) : [],
+      sourceKind:String(e.sourceKind || 'imported_pending').slice(0,100),
+      provenance:'AI_INFERRED', storageClass:'PENDING_MEMORY', status:'pending',
+      createdAt:e.createdAt || e.timestamp || new Date().toISOString()
+    };
+  }
+
+  function normalizeImportedInferenceTombstone(e){
+    if(!e || typeof e !== 'object') return null;
+    return {
+      id:String(e.id || uid('rejected')).slice(0,160),
+      sourceTurnIds:Array.isArray(e.sourceTurnIds) ? e.sourceTurnIds.map(x => String(x).slice(0,160)).slice(0,8) : [],
+      rejectedAt:String(e.rejectedAt || new Date().toISOString()).slice(0,80)
     };
   }
 
@@ -7989,12 +8307,21 @@ Return only valid JSON with this exact shape:
   }
 
   function convertExaminedTwinToNavigatorPayload(data, fileName){
-    const chat = (Array.isArray(data.chatHistory) ? data.chatHistory : []).map((m, index) => ({
-      id: m && m.id ? String(m.id) : 'examined_turn_' + compatibilityStableHash([index, m && m.role, m && m.content, m && (m.timestamp || m.date)].join('|')),
-      role: m && ['user','assistant','system'].includes(m.role) ? m.role : 'system',
-      content: String((m && (m.content || m.text)) || '').slice(0,12000),
-      timestamp: examinedTimestamp(m && (m.timestamp || m.date || m.createdAt))
-    })).filter(m => m.content.trim());
+    const chat = (Array.isArray(data.chatHistory) ? data.chatHistory : []).map((m, index) => {
+      const role = m && ['user','assistant','system'].includes(m.role) ? m.role : 'system';
+      const out = {
+        id: m && m.id ? String(m.id) : 'examined_turn_' + compatibilityStableHash([index, m && m.role, m && m.content, m && (m.timestamp || m.date)].join('|')),
+        role,
+        content: String((m && (m.content || m.text)) || '').slice(0,12000),
+        provenance:String((m && m.provenance) || (role === 'user' ? 'USER_REPORTED' : role === 'assistant' ? 'AI_OUTPUT' : 'SYSTEM_EVENT')).slice(0,80),
+        epistemicStatus:String((m && m.epistemicStatus) || 'conversation_record').slice(0,80),
+        timestamp: examinedTimestamp(m && (m.timestamp || m.date || m.createdAt))
+      };
+      if(m && m.controlEvent) out.controlEvent=String(m.controlEvent).slice(0,80);
+      if(m && m.targetTurnId) out.targetTurnId=String(m.targetTurnId).slice(0,120);
+      if(m && m.rejectedAt) out.rejectedAt=String(m.rejectedAt).slice(0,80);
+      return out;
+    }).filter(m => m.content.trim());
 
     const journal = [];
     (Array.isArray(data.archive) ? data.archive : []).forEach((entry, index) => {
@@ -8008,6 +8335,10 @@ Return only valid JSON with this exact shape:
         category: mode === 'recover' ? 'agency' : 'meaning',
         confidence:.65,
         sourceTurnIds:[],
+        provenance:'IMPORTED_USER_APPROVED',
+        storageClass:'ACTIVE_MEMORY',
+        status:'accepted',
+        source:'examined_archive',
         timestamp
       });
     });
@@ -8042,23 +8373,32 @@ Return only valid JSON with this exact shape:
     });
 
     const prf22Profile = examinedProfileToPrf22(data, fileName);
+    if(prf22Profile){
+      prf22Profile.sourceProvenance = data.profileProvenance && typeof data.profileProvenance === 'object'
+        ? Object.assign({}, data.profileProvenance)
+        : { provenance:'AI_INFERRED', storageClass:'USER_ARTIFACT', status:'working_hypothesis' };
+    }
     return {
       appVersion:'Examined compatibility import',
       exportedAt:new Date().toISOString(),
+      corrigibilitySchemaVersion:data.corrigibilitySchemaVersion || 'legacy-examined',
       chat,
       journal,
       coherencePulse,
       prf22Profile,
+      pendingLearnings:[],
+      rejectedInferenceTombstones:Array.isArray(data.rejectedInferenceTombstones) ? data.rejectedInferenceTombstones : [],
+      corrigibilityMode:'default',
       mode:data.currentMode === 'human_starts' ? 'human_starts' : 'twin_asks',
       compatibilityImport:{
         sourceFormat:'Examined full twin',
-        adapterVersion:'examined-compat-v1',
+        adapterVersion:'examined-compat-v2-corrigibility',
         fileName:fileName || '',
         notes:[
-          'Examined chatHistory mapped to Navigator conversation turns.',
-          'Examined archive mapped to clearly labeled Navigator Journal entries.',
+          'Examined chatHistory mapped to Navigator conversation turns with corrigibility provenance/status preserved when available.',
+          'Examined archive mapped to clearly labeled Navigator Journal entries as imported user-approved artifacts.',
           'Examined six-signal coherence mapped to the first six Navigator signals; Beauty / Awe / Meaning set to neutral 3 as a non-observed compatibility placeholder.',
-          'PRF raw scores and source profile prose preserved where present.'
+          'PRF raw scores and source profile prose preserved where present; generated profile remains a working AI synthesis rather than user-confirmed identity.'
         ]
       }
     };
@@ -8131,7 +8471,7 @@ Return only valid JSON with this exact shape:
     if(!coverage){
       coverage = {};
       DIMENSIONS.forEach(d => { coverage[d.key] = 0; });
-      journal.forEach(e => { coverage[e.category] = Math.min(5, (coverage[e.category] || 0) + 1); });
+      journal.filter(e => e.status !== 'rejected' && e.status !== 'pending').forEach(e => { coverage[e.category] = Math.min(5, (coverage[e.category] || 0) + 1); });
     } else {
       const safe = {};
       DIMENSIONS.forEach(d => { safe[d.key] = Math.max(0, Math.min(5, Number(coverage[d.key]) || 0)); });
@@ -8161,9 +8501,13 @@ Return only valid JSON with this exact shape:
     const firstSession = normalizeFirstSessionState(data.firstSession || null);
     const maturitySnapshotBaseline = data.maturitySnapshotBaseline && typeof data.maturitySnapshotBaseline === 'object' ? data.maturitySnapshotBaseline : null;
     const compatibilityImport = data.compatibilityImport && typeof data.compatibilityImport === 'object' ? data.compatibilityImport : null;
-    const hasUsable = chat.length || journal.length || documentCapsules.length || fieldScans.length || moveCards.length || pendingMoveCards.length || coachNotes.length || coherencePulse.length || phenomenologyPulse.length || livingThreads.length || Object.keys(capabilityLessons.completed || {}).length || Object.keys(capabilityLessons.reflections || {}).length || prf22Profile || maturitySnapshotBaseline || (contextAssembly && contextAssembly.text && contextAssembly.text.trim());
+    const pendingLearnings = Array.isArray(data.pendingLearnings) ? data.pendingLearnings.map(normalizeImportedPendingLearning).filter(Boolean).slice(-8) : [];
+    const rejectedInferenceTombstones = Array.isArray(data.rejectedInferenceTombstones) ? data.rejectedInferenceTombstones.map(normalizeImportedInferenceTombstone).filter(Boolean).slice(-30) : [];
+    const corrigibilityMode = ['default','literal','question_only'].includes(data.corrigibilityMode) ? data.corrigibilityMode : 'default';
+    const corrigibilitySchemaVersion = String(data.corrigibilitySchemaVersion || 'legacy-untyped').slice(0,80);
+    const hasUsable = chat.length || journal.length || pendingLearnings.length || documentCapsules.length || fieldScans.length || moveCards.length || pendingMoveCards.length || coachNotes.length || coherencePulse.length || phenomenologyPulse.length || livingThreads.length || Object.keys(capabilityLessons.completed || {}).length || Object.keys(capabilityLessons.reflections || {}).length || prf22Profile || maturitySnapshotBaseline || (contextAssembly && contextAssembly.text && contextAssembly.text.trim());
     if(!hasUsable) throw new Error('The selected JSON does not contain usable Navigator memory records.');
-    return { chat, journal, coverage, questions, mode, twinStance, documentCapsules, fieldScans, contextAssembly, moveCards, pendingMoveCards, currentMoveId, moveCompareSelection, moveComparisonLens, currentMovePlan, prf22Profile, coachNotes, livingThreads, capabilityLessons, coherencePulse, phenomenologyPulse, firstSession, maturitySnapshotBaseline, compatibilityImport }; 
+    return { chat, journal, coverage, questions, mode, twinStance, documentCapsules, fieldScans, contextAssembly, moveCards, pendingMoveCards, currentMoveId, moveCompareSelection, moveComparisonLens, currentMovePlan, prf22Profile, coachNotes, livingThreads, capabilityLessons, coherencePulse, phenomenologyPulse, firstSession, maturitySnapshotBaseline, compatibilityImport, pendingLearnings, rejectedInferenceTombstones, corrigibilityMode, corrigibilitySchemaVersion }; 
   }
 
   async function handleImportTwinMemoryFile(event){
@@ -8215,8 +8559,10 @@ Return only valid JSON with this exact shape:
       setPhenomenologyPulseHistory(restored.phenomenologyPulse || []);
       setFirstSessionState(restored.firstSession || normalizeFirstSessionState(null));
       setMaturitySnapshotBaseline(restored.maturitySnapshotBaseline || null);
+      setPendingLearnings(restored.pendingLearnings || []);
+      setRejectedInferenceTombstones(restored.rejectedInferenceTombstones || []);
       clearPendingCapsule();
-      try { localStorage.setItem(KEYS.mode, restored.mode); localStorage.setItem(KEYS.twinStance, restored.twinStance || 'auto'); } catch(e) {}
+      try { localStorage.setItem(KEYS.mode, restored.mode); localStorage.setItem(KEYS.twinStance, restored.twinStance || 'auto'); localStorage.setItem(KEYS.corrigibilityMode, restored.corrigibilityMode || 'default'); } catch(e) {}
       try { localStorage.setItem(KEYS.lastSaved, new Date().toISOString()); } catch(e) {}
       renderAll();
       alert('Twin memory restored. Conversation turns: ' + restored.chat.length + '. Journal entries: ' + restored.journal.length + '. Document capsules: ' + (restored.documentCapsules || []).length + '. Field scans: ' + (restored.fieldScans || []).length + '. Move cards: ' + (restored.moveCards || []).length + '. Current move plan: ' + (restored.currentMovePlan ? 'yes' : 'no') + '. PRF-22 profile: ' + (restored.prf22Profile ? 'yes' : 'no') + '. Guide notes: ' + (restored.coachNotes || []).length + '. Living Threads: ' + (restored.livingThreads || []).length + '. Coherence Check readings: ' + (restored.coherencePulse || []).length + '. Phenomenology First entries: ' + (restored.phenomenologyPulse || []).length + '. Capability lessons: ' + Object.keys((restored.capabilityLessons && restored.capabilityLessons.completed) || {}).length + ' completed.');
@@ -8251,6 +8597,8 @@ Return only valid JSON with this exact shape:
     if(kind === 'coach') return [item.coachId, mergeNormalizeText(item.title), mergeNormalizeText(item.summary).slice(0, 500)].join('|');
     if(kind === 'pulse') return [item.createdAt, JSON.stringify(item.scores || {}), mergeNormalizeText(item.note).slice(0, 200)].join('|');
     if(kind === 'thread') return [mergeNormalizeText(item.title), item.type, mergeNormalizeText(item.why).slice(0, 300), mergeNormalizeText(item.nextContact).slice(0, 200)].join('|');
+    if(kind === 'pending') return [(item.sourceTurnIds || []).join(','), mergeNormalizeText(item.text)].join('|');
+    if(kind === 'tombstone') return [item.id, (item.sourceTurnIds || []).join(','), item.rejectedAt || ''].join('|');
     return mergeNormalizeText(JSON.stringify(item).slice(0, 1000));
   }
 
@@ -8330,7 +8678,9 @@ Return only valid JSON with this exact shape:
       coachNotes: mergeCollection(getCoachNotes(), restored.coachNotes, 'coach', 80),
       livingThreads: mergeCollection(getLivingThreads(), restored.livingThreads, 'thread', 80),
       coherencePulse: mergeCollection(getCoherencePulseHistory(), restored.coherencePulse, 'pulse', 120),
-      phenomenologyPulse: mergeCollection(getPhenomenologyPulseHistory(), restored.phenomenologyPulse, 'phenom', 120)
+      phenomenologyPulse: mergeCollection(getPhenomenologyPulseHistory(), restored.phenomenologyPulse, 'phenom', 120),
+      pendingLearnings: mergeCollection(getPendingLearnings(), restored.pendingLearnings, 'pending', 8),
+      rejectedInferenceTombstones: mergeCollection(getRejectedInferenceTombstones(), restored.rejectedInferenceTombstones, 'tombstone', 30)
     };
     const questions = mergeQuestions(getQuestions(), restored.questions);
     const coverage = mergeCoverage(getCoverage(), restored.coverage);
@@ -8419,6 +8769,8 @@ Return only valid JSON with this exact shape:
       + mergeStatsLine('Living Threads', c.livingThreads)
       + mergeStatsLine('Coherence Check readings', c.coherencePulse)
       + mergeStatsLine('Phenomenology First entries', c.phenomenologyPulse)
+      + mergeStatsLine('Pending Twin learnings', c.pendingLearnings)
+      + mergeStatsLine('Rejected-inference tombstones', c.rejectedInferenceTombstones)
       + '</ul>'
       + '<p><strong>Preserved by default:</strong> settings and backend URL. PRF profile: ' + escapeHtml(plan.prfAction) + '. Context Assembly: ' + escapeHtml(plan.contextAction) + '. Current Move: ' + escapeHtml(plan.currentMoveAction) + '. Current Move Plan: ' + escapeHtml(plan.currentMovePlanAction) + '.</p>'
       + '<div class="toolbar"><button class="btn small primary" type="button" onclick="confirmMergeTwinMemory()">Confirm Merge</button><button class="btn small ghost" type="button" onclick="cancelMergeTwinMemory()">Cancel Merge</button></div>';
@@ -8488,7 +8840,12 @@ Return only valid JSON with this exact shape:
       setPhenomenologyPulseHistory(plan.collections.phenomenologyPulse.items);
       setFirstSessionState(plan.firstSession || getFirstSessionState());
       setMaturitySnapshotBaseline(plan.maturitySnapshotBaseline || getMaturitySnapshotBaseline());
-      try { localStorage.setItem(KEYS.lastSaved, new Date().toISOString()); } catch(e) {}
+      setPendingLearnings(plan.collections.pendingLearnings.items);
+      setRejectedInferenceTombstones(plan.collections.rejectedInferenceTombstones.items);
+      try {
+        localStorage.setItem(KEYS.lastSaved, new Date().toISOString());
+        if(getCorrigibilityMode() === 'default' && plan.imported && plan.imported.corrigibilityMode && plan.imported.corrigibilityMode !== 'default') localStorage.setItem(KEYS.corrigibilityMode, plan.imported.corrigibilityMode);
+      } catch(e) {}
       pendingMergeImportPlan = null;
       renderMergeImportPreview(null);
       renderAll();
@@ -8717,7 +9074,7 @@ Return only valid JSON with this shape:
     capsules.push(saved);
     setCapsules(capsules);
     if(addJournal && saved.suggestedJournalEntry){
-      addJournalLearning({ journalEntry:saved.suggestedJournalEntry, category:'meaning', confidence:.74 }, ['document:' + (saved.fileName || saved.id)]);
+      addJournalLearning({ journalEntry:saved.suggestedJournalEntry, category:'meaning', confidence:.74 }, ['document:' + (saved.fileName || saved.id)], 'USER_CONFIRMED_AI_INFERENCE');
     } else {
       addMessage('system', 'Document Capsule remembered: “' + saved.title + '.”');
     }
