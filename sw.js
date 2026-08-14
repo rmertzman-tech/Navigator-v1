@@ -1,8 +1,8 @@
 // The Navigator — Ethics Beyond Boundaries
-// Fall 2026 RC1 service worker
+// CORRIGIBILITY-2 staging prototype service worker
 // Purpose: lightweight offline cache for the single-file Navigator PWA.
 
-const CACHE_NAME = 'navigator-fall-2026-rc1';
+const CACHE_NAME = 'navigator-fall-2026-corrigibility-2';
 
 const CORE_ASSETS = [
   './',
