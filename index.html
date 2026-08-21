@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta name="navigator-build" content="navigator-fall-2026-corrigibility-2-cache-nav-c2-1" />
+  <meta name="navigator-build" content="navigator-fall-2026-corrigibility-2-cache-nav-c2-2-locked" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Navigator — Ethics Beyond Boundaries</title>
@@ -6962,19 +6962,33 @@ function importStandaloneDailyPulseJSON(pulse){
     if(Array.isArray(system) && data && data.usage){
       const usage = data.usage || {};
       window.NAVIGATOR_CACHE_LAST_USAGE = {
-        version:'cache-nav-c2-1',
+        version:'cache-nav-c2-2',
         cache_creation_input_tokens:usage.cache_creation_input_tokens || 0,
         cache_read_input_tokens:usage.cache_read_input_tokens || 0,
         input_tokens:usage.input_tokens || 0,
         output_tokens:usage.output_tokens || 0,
         cache_hit:(usage.cache_read_input_tokens || 0) > 0
       };
-      console.log('[Navigator CACHE-NAV-C2-1]', window.NAVIGATOR_CACHE_LAST_USAGE);
     }
     const reply = (data.response || data.reply || data.text || (data.content && data.content[0] && data.content[0].text) || '').trim();
     if(!reply) throw new Error('Empty backend reply');
     return reply;
   }
+
+  window.navigatorCacheDiagnostics = function(){
+    return {
+      build:'navigator-fall-2026-corrigibility-2-cache-nav-c2-2-locked',
+      runtimeBuild:window.NAV_FALL_2026_BUILD || 'navigator-fall-2026-corrigibility-2-cache-nav-c2-2-locked',
+      appVersion:APP_VERSION,
+      cache:window.NAVIGATOR_CACHE_LAST_USAGE || null,
+      importCompatibility:{
+        lineage:'CORRIGIBILITY-2',
+        fullNavigatorBackup:true,
+        phenomenologyClassifier:true,
+        prf22Compatibility:true
+      }
+    };
+  };
 
   async function testBackendConnection(){
     setBackendStatus('wait', 'Testing backend…');
@@ -11109,8 +11123,7 @@ Return only valid JSON with this shape:
   window.addEventListener('hashchange', applyHashWorkspace);
 
 
-  window.NAV_FALL_2026_BUILD = 'navigator-v3.6e.12-nav-pulse-4e4-countwords-double-lock';
-console.info('Navigator build loaded:', window.NAV_FALL_2026_BUILD);
+  window.NAV_FALL_2026_BUILD = 'navigator-fall-2026-corrigibility-2-cache-nav-c2-2-locked';
 
 // ── Navigator-4E: Phase 1 ABCD Prompt Bank Integration ──
   // Purpose: make Attend + ABCD prompts visibly present before writing,

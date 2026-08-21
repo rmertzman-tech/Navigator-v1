@@ -1,7 +1,7 @@
 {
   "name": "The Navigator — Ethics Beyond Boundaries",
   "short_name": "Navigator",
-  "description": "A local-first Ethics Beyond Boundaries reflection tool with user-controlled AI memory, phenomenological veto controls, explicit support resources, and cross-app JSON compatibility. CORRIGIBILITY-2 staging prototype.",
+  "description": "A local-first Ethics Beyond Boundaries reflection tool with user-controlled AI memory, phenomenological veto controls, explicit support resources, cross-app JSON compatibility, and certified Corrigibility-2 Twin prompt caching.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

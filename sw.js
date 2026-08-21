@@ -1,8 +1,8 @@
 // The Navigator — Ethics Beyond Boundaries
-// CORRIGIBILITY-2 staging prototype service worker
+// CORRIGIBILITY-2 CACHE-NAV-C2-2 certified reference service worker
 // Purpose: lightweight offline cache for the single-file Navigator PWA.
 
-const CACHE_NAME = 'navigator-fall-2026-corrigibility-2';
+const CACHE_NAME = 'navigator-fall-2026-corrigibility-2-cache-nav-c2-2';
 
 const CORE_ASSETS = [
   './',
